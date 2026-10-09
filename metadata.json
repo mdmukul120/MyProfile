@@ -1,0 +1,6 @@
+{
+  "name": "Aura Gold - Premium Executive Profile",
+  "description": "একটি সম্পূর্ণ রিসপনসিভ প্রিমিয়াম ডার্ক গোল্ডেন প্রোফাইল পোর্টফোলিও ও এক্সিকিউটিভ শোকেস।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

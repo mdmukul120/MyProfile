@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --gold-primary: #D4AF37;
+    --gold-bright: #F7E79B;
+    --gold-deep: #AA8022;
+    --gold-dark: #7A5812;
+    --gold-muted: rgba(212, 175, 55, 0.15);
+    --bg-onyx: #0A0B0E;
+    --bg-card: #121319;
+    --bg-card-subtle: #171922;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #090A0E;
+    color: #E8DCC4;
+  }
+}
+
+.font-display {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.font-body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Luxury Gold Gradients & Borders */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #FFF4D0 0%, #E6C875 35%, #D4AF37 70%, #996F19 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-text-subtle {
+  background: linear-gradient(135deg, #F5E8C7 0%, #D8B758 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #E6C875 0%, #D4AF37 50%, #996F19 100%);
+}
+
+.gold-gradient-bg-subtle {
+  background: linear-gradient(135deg, rgba(230, 200, 117, 0.12) 0%, rgba(212, 175, 55, 0.04) 100%);
+}
+
+.gold-border {
+  border-color: rgba(212, 175, 55, 0.28);
+}
+
+.gold-border-glow {
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.12);
+}
+
+.gold-card {
+  background: linear-gradient(180deg, #13141B 0%, #0E0F14 100%);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.gold-card:hover {
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+/* Custom Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #090A0E;
+}
+::-webkit-scrollbar-thumb {
+  background: #3A321E;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
+
+/* Ambient Gold Glow */
+.gold-glow-radial {
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(10, 11, 14, 0) 70%);
+}
