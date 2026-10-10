@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "MiniSite": {
+      "title": "MiniSite",
+      "description": "A hosted dynamic mini-webpage mapped to a unique slug.",
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9_-]+$",
+          "description": "Unique URL identifier for the mini-site"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Title of the mini-site"
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Subtitle or tagline"
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Author or publisher name"
+        },
+        "avatar": {
+          "type": "string",
+          "maxLength": 2048,
+          "description": "Avatar or banner image URL"
+        },
+        "github": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "GitHub profile link"
+        },
+        "twitter": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Twitter profile link"
+        },
+        "website": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Personal or corporate website link"
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 1000000,
+          "description": "Uploaded index.html or markdown content"
+        },
+        "contentType": {
+          "type": "string",
+          "enum": ["html", "markdown", "hybrid"],
+          "description": "Type of content"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when site was last published"
+        }
+      },
+      "required": ["slug", "title", "content"]
+    }
+  },
+  "firestore": {
+    "/mini_sites/{slug}": {
+      "schema": "MiniSite",
+      "description": "Publicly accessible hosted mini websites indexed by slug"
+    }
+  }
+}

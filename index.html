@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MiniHost — Dynamic Mini-Site Builder & Hosting Platform</title>
-  <meta name="description" content="Build, publish, and host dynamic mini-webpages with custom slugs on Vercel backed by Firebase Firestore.">
+  <title>MiniHost — Dynamic Mini-Site Builder & HTML Hosting Platform</title>
+  <meta name="description" content="Host index.html files or build dynamic mini-sites with custom slugs powered by Firebase Firestore and Vercel.">
 
-  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans, JetBrains Mono & Tiro Bangla -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet">
 
   <!-- Bootstrap Icons CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -34,7 +34,7 @@
             darkBorder: '#1E293B',
           },
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', '"Tiro Bangla"', 'system-ui', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           }
         }
@@ -46,13 +46,13 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
 
-  <!-- Firebase App & Cloud Firestore (Compat SDK for robust single-file deployment) -->
+  <!-- Firebase App & Cloud Firestore (Compat SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Tiro Bangla', system-ui, -apple-system, sans-serif;
       background-color: #070A0F;
       color: #F8FAFC;
       min-height: 100vh;
@@ -117,6 +117,17 @@
     .user-content pre { background-color: #0F172A; border: 1px solid #1E293B; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
     .user-content pre code { background: transparent; padding: 0; color: #E2E8F0; }
     .user-content img { max-width: 100%; height: auto; border-radius: 0.5rem; border: 1px solid #1E293B; margin: 1rem 0; }
+
+    /* Dropzone animation */
+    .file-dropzone {
+      border: 2px dashed rgba(163, 230, 53, 0.35);
+      transition: all 0.25s ease;
+    }
+    .file-dropzone.drag-active {
+      border-color: #A3E635;
+      background-color: rgba(163, 230, 53, 0.08);
+      transform: scale(1.01);
+    }
   </style>
 </head>
 
@@ -140,24 +151,20 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="font-bold text-lg text-white tracking-tight">Mini<span class="text-limeAccent-400">Host</span></span>
-            <span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30 rounded-full">v1.0</span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30 rounded-full">LIVE FIREBASE</span>
           </div>
-          <p class="text-[11px] text-slate-400 font-mono">Dynamic Slugs · Vercel Ready</p>
+          <p class="text-[11px] text-slate-400 font-mono">index.html Uploader · Dynamic Slugs</p>
         </div>
       </a>
 
       <!-- Right Header Controls -->
       <div class="flex items-center gap-3">
-        <!-- Firebase Status Pill -->
-        <button 
-          onclick="openFirebaseConfigModal()"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400/40 text-xs font-mono transition-colors text-slate-300"
-          title="Configure Firebase Credentials"
-        >
+        <!-- Live Firebase Status Pill -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder text-xs font-mono text-slate-300">
           <span id="firebaseStatusDot" class="w-2 h-2 rounded-full bg-limeAccent-400 animate-pulse"></span>
           <span id="firebaseStatusText" class="hidden sm:inline">Firestore Connected</span>
-          <i class="bi bi-gear-fill text-slate-400 text-xs"></i>
-        </button>
+          <span class="text-[10px] text-limeAccent-400/80 font-mono hidden md:inline">gen-lang-client</span>
+        </div>
 
         <!-- New Page Action Button -->
         <button 
@@ -184,27 +191,62 @@
       <!-- Hero Intro -->
       <div class="text-center max-w-2xl mx-auto space-y-3">
         <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30">
-          Instant Dynamic Page Builder
+          Instant Mini-Site Hosting on Firebase Firestore
         </span>
         <h1 class="text-3xl sm:text-5xl font-extrabold text-gradient-lime tracking-tight leading-tight">
-          Build & Host Your Mini-Page With a Custom Slug
+          Host Your index.html or Build a Dynamic Mini-Page
         </h1>
         <p class="text-sm sm:text-base text-slate-400 leading-relaxed">
-          Create portfolio cards, personal bio links, docs, or landing pages. Everything is mapped to your unique slug on Firestore and accessible via <span class="text-limeAccent-400 font-mono">?site=your-slug</span> on Vercel.
+          Upload any <span class="text-limeAccent-400 font-mono">index.html</span> file or write custom Markdown/HTML. Your mini-site is saved directly to Firebase Firestore under your unique slug and served via <span class="text-limeAccent-400 font-mono">?site=your-slug</span>!
         </p>
+      </div>
+
+      <!-- INDEX.HTML DRAG & DROP UPLOAD BANNER -->
+      <div 
+        id="htmlDropzone"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+        ondrop="handleFileDrop(event)"
+        onclick="document.getElementById('fileUploadInput').click()"
+        class="file-dropzone rounded-2xl p-6 sm:p-8 bg-darkCard/90 hover:bg-darkCardHover text-center cursor-pointer relative overflow-hidden group shadow-xl"
+      >
+        <input 
+          type="file" 
+          id="fileUploadInput" 
+          accept=".html,.htm" 
+          onchange="handleFileSelect(event)" 
+          class="hidden" 
+        />
+        <div class="max-w-md mx-auto space-y-3">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-limeAccent-400/10 border border-limeAccent-400/30 flex items-center justify-center text-limeAccent-400 text-2xl group-hover:scale-110 transition-transform shadow-inner">
+            <i class="bi bi-file-earmark-code"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-limeAccent-300 transition-colors">
+              এখানে আপনার <span class="text-limeAccent-400 font-mono">index.html</span> ফাইল আপলোড করুন
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">
+              ড্র্যাগ করে এনে ছেড়ে দিন অথবা ক্লিক করে আপনার কম্পিউটার থেকে নির্বাচন করুন
+            </p>
+          </div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-darkBorder text-[11px] font-mono text-limeAccent-400">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span>অটো-এক্সট্র্যাক্ট করবে Title, Subtitle এবং Full HTML কোড</span>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Template Selector Strip -->
       <div class="flex items-center justify-center gap-2 flex-wrap">
-        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider mr-1">Quick Templates:</span>
-        <button onclick="applyTemplate('developer')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors">
+        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider mr-1">বা টেমপ্লেট বেছে নিন:</span>
+        <button onclick="applyTemplate('developer')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer">
           💻 Developer Portfolio
         </button>
-        <button onclick="applyTemplate('creator')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors">
+        <button onclick="applyTemplate('creator')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer">
           🎨 Creator Bio & Links
         </button>
-        <button onclick="applyTemplate('product')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors">
-          🚀 Product Launch
+        <button onclick="applyTemplate('product')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer">
+          🚀 Product Launch Page
         </button>
       </div>
 
@@ -216,9 +258,26 @@
           <div class="flex items-center justify-between pb-4 border-b border-darkBorder">
             <div class="flex items-center gap-2.5">
               <i class="bi bi-pencil-square text-limeAccent-400 text-lg"></i>
-              <h2 class="text-lg font-bold text-white">Page Configuration</h2>
+              <h2 class="text-lg font-bold text-white">Site Details & Content</h2>
             </div>
-            <span class="text-xs font-mono text-slate-400">Step 1 of 2</span>
+            <div class="flex items-center gap-2">
+              <button 
+                type="button" 
+                id="modeMarkdownBtn"
+                onclick="setContentMode('markdown')"
+                class="px-2.5 py-1 rounded text-xs font-mono font-bold bg-limeAccent-400 text-slate-950 transition-colors"
+              >
+                Markdown
+              </button>
+              <button 
+                type="button" 
+                id="modeHtmlBtn"
+                onclick="setContentMode('html')"
+                class="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-white transition-colors"
+              >
+                Raw HTML
+              </button>
+            </div>
           </div>
 
           <form id="creatorForm" onsubmit="handlePublish(event)" class="space-y-5">
@@ -226,7 +285,7 @@
             <!-- Slug Input with Dynamic Live Domain Preview -->
             <div class="space-y-2">
               <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
-                Desired Slug (Site Identifier) <span class="text-limeAccent-400">*</span>
+                Desired Slug (ইউনিক স্লাগ আইডি) <span class="text-limeAccent-400">*</span>
               </label>
               <div class="flex items-center rounded-xl bg-darkCanvas border border-darkBorder focus-within:border-limeAccent-400 transition-colors overflow-hidden">
                 <span class="px-3.5 py-2.5 text-xs font-mono text-slate-500 border-r border-darkBorder select-none">
@@ -236,14 +295,14 @@
                   type="text" 
                   id="inputSlug" 
                   required
-                  placeholder="alex-portfolio" 
+                  placeholder="my-portfolio" 
                   oninput="handleSlugInput(this.value)"
                   class="flex-1 px-3 py-2.5 bg-transparent text-sm text-limeAccent-400 font-mono placeholder-slate-600 focus:outline-none"
                 />
               </div>
               <p class="text-[11px] text-slate-500 flex items-center justify-between font-mono">
                 <span>Allowed: lowercase letters, numbers, and hyphens (-)</span>
-                <span id="slugAvailabilityBadge" class="text-slate-400 font-semibold">Live Preview Active</span>
+                <span id="slugAvailabilityBadge" class="text-limeAccent-400 font-semibold">Ready to Map</span>
               </p>
             </div>
 
@@ -251,13 +310,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-1.5">
                 <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
-                  Page Title <span class="text-limeAccent-400">*</span>
+                  Page Title (ওয়েবপেজের শিরোনাম) <span class="text-limeAccent-400">*</span>
                 </label>
                 <input 
                   type="text" 
                   id="inputTitle" 
                   required
-                  placeholder="e.g. Alex Rivera" 
+                  placeholder="e.g. My Awesome Project" 
                   oninput="updateLivePreview()"
                   class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
                 />
@@ -265,12 +324,12 @@
 
               <div class="space-y-1.5">
                 <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
-                  Subtitle / Role
+                  Subtitle / Tagline (উপশিরোনাম)
                 </label>
                 <input 
                   type="text" 
                   id="inputSubtitle" 
-                  placeholder="e.g. Full-Stack Architect" 
+                  placeholder="e.g. Hosted on Firebase Firestore" 
                   oninput="updateLivePreview()"
                   class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
                 />
@@ -286,7 +345,7 @@
                 <input 
                   type="text" 
                   id="inputAuthor" 
-                  placeholder="e.g. Alex Rivera Studio" 
+                  placeholder="e.g. Mukul Ahmed" 
                   oninput="updateLivePreview()"
                   class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
                 />
@@ -294,7 +353,7 @@
 
               <div class="space-y-1.5">
                 <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
-                  Avatar / Image URL
+                  Avatar / Logo Image URL
                 </label>
                 <input 
                   type="url" 
@@ -315,21 +374,21 @@
                 <input 
                   type="text" 
                   id="inputGithub" 
-                  placeholder="GitHub URL / Username" 
+                  placeholder="GitHub Link" 
                   oninput="updateLivePreview()"
                   class="px-3 py-2 rounded-xl bg-darkCanvas border border-darkBorder text-xs text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400"
                 />
                 <input 
                   type="text" 
                   id="inputTwitter" 
-                  placeholder="Twitter / X URL" 
+                  placeholder="Twitter / X Link" 
                   oninput="updateLivePreview()"
                   class="px-3 py-2 rounded-xl bg-darkCanvas border border-darkBorder text-xs text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400"
                 />
                 <input 
                   type="text" 
                   id="inputWebsite" 
-                  placeholder="Personal Website URL" 
+                  placeholder="Website Link" 
                   oninput="updateLivePreview()"
                   class="px-3 py-2 rounded-xl bg-darkCanvas border border-darkBorder text-xs text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400"
                 />
@@ -340,16 +399,16 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
-                  Page Content (Markdown or HTML) <span class="text-limeAccent-400">*</span>
+                  Page Content / Uploaded HTML <span class="text-limeAccent-400">*</span>
                 </label>
-                <span class="text-[11px] text-slate-400 font-mono">Markdown formatting supported</span>
+                <span id="contentModeBadge" class="text-[11px] text-limeAccent-400 font-mono">Markdown Mode Active</span>
               </div>
               <textarea 
                 id="inputContent" 
-                rows="8" 
+                rows="10" 
                 required
                 oninput="updateLivePreview()"
-                placeholder="# Welcome to my digital space&#10;&#10;Here you can write your story, project highlights, or embedded HTML." 
+                placeholder="Write your Markdown or paste your complete HTML code here..." 
                 class="w-full p-4 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors leading-relaxed"
               ></textarea>
             </div>
@@ -361,7 +420,7 @@
               class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-limeAccent-400 via-limeAccent-500 to-limeAccent-400 hover:from-limeAccent-300 hover:to-limeAccent-400 text-slate-950 font-bold text-sm tracking-wide shadow-lg shadow-limeAccent-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
             >
               <i id="publishBtnIcon" class="bi bi-cloud-arrow-up-fill text-base"></i>
-              <span id="publishBtnText">Publish Page to Firestore</span>
+              <span id="publishBtnText">Publish to Firebase Firestore</span>
             </button>
 
           </form>
@@ -372,9 +431,9 @@
           <div class="flex items-center justify-between px-2">
             <span class="text-xs font-mono uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-limeAccent-400 animate-ping"></span>
-              Real-Time Preview
+              Live Sandbox Preview
             </span>
-            <span class="text-xs font-mono text-slate-500" id="previewSlugIndicator">mysite.vercel.app/?site=alex-portfolio</span>
+            <span class="text-xs font-mono text-slate-500 truncate max-w-[200px]" id="previewSlugIndicator">?site=my-portfolio</span>
           </div>
 
           <!-- Preview Frame Shell -->
@@ -387,11 +446,11 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
               </div>
-              <span class="truncate max-w-[200px] text-slate-400 text-[11px]" id="previewBarUrl">/site/alex-portfolio</span>
+              <span class="truncate max-w-[200px] text-slate-400 text-[11px]" id="previewBarUrl">/site/my-portfolio</span>
               <i class="bi bi-arrow-repeat text-slate-500"></i>
             </div>
 
-            <!-- Preview Canvas Body -->
+            <!-- Preview Canvas Body (Supports both Card layout and HTML Iframe) -->
             <div id="previewCardBody" class="p-6 sm:p-7 space-y-6 max-h-[560px] overflow-y-auto">
               <!-- Avatar & Title Lockup -->
               <div class="flex items-center gap-4">
@@ -400,8 +459,8 @@
                   <img id="previewAvatarImg" class="hidden w-full h-full object-cover" alt="Preview Avatar" />
                 </div>
                 <div class="overflow-hidden">
-                  <h3 id="previewTitle" class="text-lg font-bold text-white truncate">Alex Rivera</h3>
-                  <p id="previewSubtitle" class="text-xs text-limeAccent-400 font-medium truncate">Full-Stack Architect & Designer</p>
+                  <h3 id="previewTitle" class="text-lg font-bold text-white truncate">My Awesome Project</h3>
+                  <p id="previewSubtitle" class="text-xs text-limeAccent-400 font-medium truncate">Hosted on Firebase Firestore</p>
                 </div>
               </div>
 
@@ -414,8 +473,11 @@
 
               <!-- Content Body Preview -->
               <div id="previewContentBody" class="user-content text-xs text-slate-300 leading-relaxed border-t border-darkBorder/60 pt-4">
-                <p>Start typing in the creator form to see your mini-page preview update automatically...</p>
+                <p>Start typing or upload an index.html file to preview your hosted mini-page in real time...</p>
               </div>
+
+              <!-- Iframe View Container for Full Standalone HTML -->
+              <iframe id="previewIframe" class="hidden w-full h-[400px] rounded-lg border border-darkBorder bg-white"></iframe>
             </div>
 
           </div>
@@ -428,9 +490,9 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <i class="bi bi-clock-history text-limeAccent-400"></i>
-            <h3 class="text-base font-bold text-white">Your Published Sites</h3>
+            <h3 class="text-base font-bold text-white">Your Published Firestore Sites</h3>
           </div>
-          <span class="text-xs font-mono text-slate-500">Saved in this browser & Firestore</span>
+          <span class="text-xs font-mono text-slate-500">Live in Firebase Database</span>
         </div>
 
         <div id="recentSitesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -443,7 +505,7 @@
     <!-- ------------------------------------------------------------- -->
     <!-- 2. DYNAMIC SITE VIEWER (Rendered when ?site=slug is loaded)    -->
     <!-- ------------------------------------------------------------- -->
-    <div id="viewSiteViewer" class="hidden max-w-3xl mx-auto space-y-8">
+    <div id="viewSiteViewer" class="hidden max-w-4xl mx-auto space-y-8">
       
       <!-- Back to Dashboard Pill -->
       <div class="flex items-center justify-between">
@@ -451,13 +513,15 @@
           <i class="bi bi-arrow-left"></i>
           <span>Back to MiniHost Dashboard</span>
         </a>
-        <span class="px-2.5 py-0.5 rounded-full bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30 text-[11px] font-mono">
-          Live Hosted Site
-        </span>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30 text-[11px] font-mono">
+            Firebase Firestore Hosted
+          </span>
+        </div>
       </div>
 
-      <!-- Live Site Card Container -->
-      <article class="glass-card rounded-3xl p-8 sm:p-12 shadow-2xl border border-darkBorder space-y-8 relative overflow-hidden">
+      <!-- Live Site Card Container (For Markdown/Standard Pages) -->
+      <article id="liveCardArticle" class="glass-card rounded-3xl p-8 sm:p-12 shadow-2xl border border-darkBorder space-y-8 relative overflow-hidden">
         
         <!-- Ambient Header Light -->
         <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-24 bg-limeAccent-400/15 blur-3xl rounded-full pointer-events-none"></div>
@@ -495,7 +559,7 @@
         <!-- Footer Ribbon -->
         <div class="pt-8 border-t border-darkBorder/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
           <div>
-            Hosted on <span class="text-limeAccent-400 font-bold">MiniHost</span> via Vercel & Firebase
+            Hosted on <span class="text-limeAccent-400 font-bold">MiniHost</span> via Firebase Firestore
           </div>
           <button onclick="navigateToDashboard(event)" class="text-slate-400 hover:text-white underline underline-offset-4 cursor-pointer">
             Create your own mini-page →
@@ -503,6 +567,11 @@
         </div>
 
       </article>
+
+      <!-- Full Standalone HTML Iframe Container (If user uploaded an entire index.html) -->
+      <div id="liveHtmlIframeContainer" class="hidden rounded-2xl overflow-hidden border border-darkBorder shadow-2xl bg-white">
+        <iframe id="liveFullHtmlIframe" class="w-full min-h-[85vh] border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+      </div>
 
     </div>
 
@@ -518,7 +587,7 @@
         <span class="text-xs font-mono text-rose-400 font-bold uppercase tracking-widest">404 Error</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Mini-Site Not Found</h2>
         <p class="text-sm text-slate-400 max-w-md mx-auto">
-          The requested site <span id="notFoundSlug" class="text-limeAccent-400 font-mono font-bold">?site=unknown</span> does not exist yet in the database.
+          The requested site <span id="notFoundSlug" class="text-limeAccent-400 font-mono font-bold">?site=unknown</span> does not exist in Firebase Firestore yet.
         </p>
       </div>
 
@@ -547,7 +616,7 @@
     <!-- ------------------------------------------------------------- -->
     <div id="viewLoading" class="hidden py-32 text-center space-y-4">
       <div class="w-12 h-12 mx-auto rounded-full border-3 border-darkBorder border-t-limeAccent-400 animate-spin"></div>
-      <p class="text-sm font-mono text-slate-400">Looking up site from Firebase Firestore...</p>
+      <p class="text-sm font-mono text-slate-400">Loading mini-site from Firebase Firestore...</p>
     </div>
 
   </main>
@@ -561,8 +630,8 @@
       </div>
 
       <div>
-        <h3 class="text-xl font-bold text-white">Your Mini-Page Is Live!</h3>
-        <p class="text-xs text-slate-400 mt-1">Saved to Firestore under your unique slug.</p>
+        <h3 class="text-xl font-bold text-white">Your Mini-Page Is Live on Firebase!</h3>
+        <p class="text-xs text-slate-400 mt-1">Stored securely in Cloud Firestore under your custom slug.</p>
       </div>
 
       <!-- Public URL Copy Box -->
@@ -606,72 +675,6 @@
     </div>
   </div>
 
-  <!-- ================= FIREBASE CONFIG MODAL ================= -->
-  <div id="firebaseConfigModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-    <div class="relative w-full max-w-lg bg-darkCard border border-darkBorder rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
-      
-      <div class="flex items-center justify-between pb-3 border-b border-darkBorder">
-        <div class="flex items-center gap-2.5">
-          <i class="bi bi-fire text-amber-400 text-xl"></i>
-          <div>
-            <h3 class="text-base font-bold text-white">Firebase Firestore Configuration</h3>
-            <p class="text-[11px] text-slate-400">Connect your own Firebase project credentials</p>
-          </div>
-        </div>
-        <button onclick="closeFirebaseConfigModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
-      </div>
-
-      <div class="space-y-4 text-xs font-mono">
-        <p class="text-slate-300 leading-relaxed font-sans text-xs">
-          Enter your Firebase Project configuration below (from Firebase Console &gt; Project Settings &gt; General &gt; Your apps).
-        </p>
-
-        <div class="space-y-1">
-          <label class="text-slate-400 uppercase text-[10px]">API Key</label>
-          <input type="text" id="cfgApiKey" placeholder="AIzaSy..." class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="text-slate-400 uppercase text-[10px]">Project ID</label>
-            <input type="text" id="cfgProjectId" placeholder="my-minihost-app" class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
-          </div>
-          <div class="space-y-1">
-            <label class="text-slate-400 uppercase text-[10px]">Auth Domain</label>
-            <input type="text" id="cfgAuthDomain" placeholder="my-app.firebaseapp.com" class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="text-slate-400 uppercase text-[10px]">Storage Bucket</label>
-            <input type="text" id="cfgStorageBucket" placeholder="my-app.appspot.com" class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
-          </div>
-          <div class="space-y-1">
-            <label class="text-slate-400 uppercase text-[10px]">App ID</label>
-            <input type="text" id="cfgAppId" placeholder="1:123456789:web:abcdef..." class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-3 border-t border-darkBorder flex items-center justify-between gap-3">
-        <button 
-          onclick="resetToDemoStorage()" 
-          class="px-3.5 py-2 text-xs font-mono text-slate-400 hover:text-white transition-colors cursor-pointer"
-        >
-          Use Local Demo Mode
-        </button>
-        <button 
-          onclick="saveFirebaseConfigFromModal()" 
-          class="px-5 py-2.5 rounded-xl bg-limeAccent-400 hover:bg-limeAccent-300 text-slate-950 font-bold text-xs transition-colors cursor-pointer"
-        >
-          Save & Re-Connect
-        </button>
-      </div>
-
-    </div>
-  </div>
-
   <!-- ================= TOAST NOTIFICATION ================= -->
   <div 
     id="toastBox" 
@@ -684,11 +687,11 @@
   <!-- ================= FOOTER ================= -->
   <footer class="w-full border-t border-darkBorder/80 bg-darkCanvas/95 py-6 text-xs text-slate-500 text-center">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p>© 2026 MiniHost Platform. Built with Tailwind CSS & Firebase Cloud Firestore.</p>
+      <p>© 2026 MiniHost Platform. Powered by Firebase Cloud Firestore & Vercel.</p>
       <div class="flex items-center gap-3 font-mono text-[11px]">
         <span>Single Vercel Deployment</span>
         <span>·</span>
-        <span class="text-limeAccent-400">Dynamic Slug Simulator</span>
+        <span class="text-limeAccent-400">Database: ai-studio-goldenprofilepro</span>
       </div>
     </div>
   </footer>
@@ -696,39 +699,53 @@
   <!-- ================= APPLICATION LOGIC (FIREBASE & ROUTING) ================= -->
   <script>
     // -------------------------------------------------------------
-    // 1. FIREBASE CONFIGURATION & INITIALIZATION
+    // 1. PROVISIONED FIREBASE CONFIGURATION
     // -------------------------------------------------------------
-    // You can replace these default keys with your own Firebase Console keys.
-    // The user can also update them on the fly via the "Settings" button.
-    const DEFAULT_CONFIG = {
-      apiKey: "AIzaSyDemoKeyMiniHostPlatform2026",
-      authDomain: "minihost-demo.firebaseapp.com",
-      projectId: "minihost-demo",
-      storageBucket: "minihost-demo.appspot.com",
-      messagingSenderId: "109876543210",
-      appId: "1:109876543210:web:demo998877"
+    const FIREBASE_CONFIG = {
+      projectId: "gen-lang-client-0716373678",
+      appId: "1:149784559874:web:d9d949beb073a6fa9cc21b",
+      apiKey: "AIzaSyBz9UuMfbIY0NCz-PHxpGvqIg9P3drq86M",
+      authDomain: "gen-lang-client-0716373678.firebaseapp.com",
+      firestoreDatabaseId: "ai-studio-goldenprofilepro-6b11b972-4420-45c0-9c07-87b5b5df8171",
+      storageBucket: "gen-lang-client-0716373678.firebasestorage.app",
+      messagingSenderId: "149784559874"
     };
 
     let db = null;
     let isFirestoreActive = false;
+    let currentContentMode = 'markdown'; // 'markdown' or 'html'
 
     function initFirebase() {
       try {
-        const savedConfigStr = localStorage.getItem('minihost_firebase_config');
-        const activeConfig = savedConfigStr ? JSON.parse(savedConfigStr) : DEFAULT_CONFIG;
-
-        // Initialize Firebase app if not already initialized
         if (!firebase.apps.length) {
-          firebase.initializeApp(activeConfig);
+          firebase.initializeApp(FIREBASE_CONFIG);
         }
 
-        db = firebase.firestore();
+        // Initialize Firestore with custom Database ID
+        if (FIREBASE_CONFIG.firestoreDatabaseId) {
+          db = firebase.app().firestore(FIREBASE_CONFIG.firestoreDatabaseId);
+        } else {
+          db = firebase.firestore();
+        }
+
         isFirestoreActive = true;
-        updateStatusIndicator(true, "Firestore Ready");
+        updateStatusIndicator(true, "Firestore Connected");
+        testFirestoreConnection();
       } catch (err) {
-        console.warn("Firebase initialized in Local/Demo fallback mode:", err.message);
+        console.warn("Firebase Init Error (Using fallback):", err.message);
         isFirestoreActive = false;
-        updateStatusIndicator(false, "Demo Mode (Local Active)");
+        updateStatusIndicator(false, "Offline Fallback Active");
+      }
+    }
+
+    async function testFirestoreConnection() {
+      if (!isFirestoreActive || !db) return;
+      try {
+        // Quick ping to check connection
+        await db.collection('mini_sites').limit(1).get();
+        console.log("Firestore connection verified successfully.");
+      } catch (e) {
+        console.log("Firestore ping note:", e.message);
       }
     }
 
@@ -737,21 +754,13 @@
       const label = document.getElementById('firebaseStatusText');
       if (dot && label) {
         label.textContent = text;
-        if (active) {
-          dot.className = "w-2 h-2 rounded-full bg-limeAccent-400 animate-pulse";
-        } else {
-          dot.className = "w-2 h-2 rounded-full bg-amber-400";
-        }
+        dot.className = active ? "w-2 h-2 rounded-full bg-limeAccent-400 animate-pulse" : "w-2 h-2 rounded-full bg-amber-400";
       }
     }
 
     // -------------------------------------------------------------
     // 2. ROUTING ENGINE: DETECT SLUGS VIA QUERY OR HASH
     // -------------------------------------------------------------
-    // Supports:
-    // 1. https://mysite.vercel.app/?site=alex-portfolio
-    // 2. https://mysite.vercel.app/#/site/alex-portfolio or #site/alex-portfolio
-    // 3. https://mysite.vercel.app/site/alex-portfolio (if rewritten)
     function extractSlugFromUrl() {
       const urlParams = new URLSearchParams(window.location.search);
       const querySite = urlParams.get('site');
@@ -763,7 +772,6 @@
         if (match && match[1]) return match[1].toLowerCase().trim();
       }
 
-      // Check pathname (e.g. /site/slug)
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       if (pathParts.length >= 2 && pathParts[0] === 'site') {
         return pathParts[1].toLowerCase().trim();
@@ -785,17 +793,14 @@
     function handleRouting() {
       const slug = extractSlugFromUrl();
       if (slug) {
-        // Site viewer mode
         loadAndRenderSite(slug);
       } else {
-        // Dashboard creator mode
         showDashboardView();
       }
     }
 
     function navigateToDashboard(e) {
       if (e) e.preventDefault();
-      // Remove query param or hash without reloading
       const url = new URL(window.location.href);
       url.searchParams.delete('site');
       url.hash = '';
@@ -812,10 +817,10 @@
     }
 
     // -------------------------------------------------------------
-    // 3. FIRESTORE DATA ACCESS WITH SEAMLESS LOCALSTORAGE FALLBACK
+    // 3. FIRESTORE DATA ACCESS
     // -------------------------------------------------------------
     async function getSiteBySlug(slug) {
-      // 1. Try Firestore first if available
+      // 1. Try Firebase Cloud Firestore
       if (isFirestoreActive && db) {
         try {
           const docRef = db.collection('mini_sites').doc(slug);
@@ -824,29 +829,30 @@
             return doc.data();
           }
         } catch (err) {
-          console.warn("Firestore query error, trying local fallback:", err);
+          console.warn("Firestore fetch error, checking local fallback:", err);
         }
       }
 
-      // 2. Fallback to LocalStorage database (guarantees zero-error Vercel demo)
+      // 2. Local fallback
       const localSites = JSON.parse(localStorage.getItem('minihost_local_sites') || '{}');
       if (localSites[slug]) {
         return localSites[slug];
       }
 
-      // Preloaded sample sites for immediate showcase
+      // Sample Demo site
       if (slug === 'demo') {
         return {
           slug: 'demo',
-          title: 'Welcome to MiniHost',
+          title: 'Welcome to MiniHost Platform',
           subtitle: 'The Ultra-Fast Dynamic Micro-Page Hosting System',
-          author: 'MiniHost Core Team',
+          author: 'Mukul Ahmed',
           avatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
           github: 'https://github.com',
           twitter: 'https://x.com',
           website: 'https://vercel.com',
-          content: `## Everything You Need in a Single Vercel Deployment\n\nThis page was rendered dynamically using the **\`?site=demo\`** slug mapped to Cloud Firestore!\n\n### Key Highlights\n- **Zero Config Routing:** Handles query parameters or hashes effortlessly.\n- **Sleek Dark Theme:** Lime-White high contrast palette.\n- **Markdown & HTML:** Clean sanitized rich formatting.\n- **Production Ready:** 100% self-contained in one HTML file.\n\n> "Simplicity is the ultimate sophistication." — Leonardo da Vinci`,
-          publishedAt: new Date().toISOString()
+          contentType: 'markdown',
+          content: `## Everything You Need in a Single Vercel Deployment\n\nThis page is hosted dynamically using **Firebase Cloud Firestore** under the slug **\`?site=demo\`**!\n\n### Key Highlights\n- **Live Firestore Persistence:** Saves and retrieves documents effortlessly.\n- **HTML File Upload:** Upload any \`index.html\` file directly!\n- **Sleek Dark Theme:** Lime-White high contrast palette.\n- **Markdown & HTML:** Clean sanitized rich formatting.\n\n> "Simplicity is the ultimate sophistication."`,
+          updatedAt: new Date().toISOString()
         };
       }
 
@@ -854,17 +860,19 @@
     }
 
     async function saveSiteToStorage(data) {
-      // 1. Save locally to guarantee persistence
+      // 1. Save locally for instant cache
       const localSites = JSON.parse(localStorage.getItem('minihost_local_sites') || '{}');
       localSites[data.slug] = data;
       localStorage.setItem('minihost_local_sites', JSON.stringify(localSites));
 
-      // 2. Save to Firestore if available
+      // 2. Save to Firestore
       if (isFirestoreActive && db) {
         try {
           await db.collection('mini_sites').doc(data.slug).set(data);
+          console.log("Saved to Cloud Firestore successfully:", data.slug);
         } catch (err) {
-          console.warn("Could not save to remote Firestore (saved locally):", err.message);
+          console.error("Firestore Save Error:", err);
+          throw new Error("Firestore save failed: " + err.message);
         }
       }
 
@@ -885,47 +893,63 @@
       document.getElementById('viewLoading').classList.add('hidden');
 
       if (!siteData) {
-        // Show 404 Site Not Found View
         document.getElementById('notFoundSlug').textContent = `?site=${slug}`;
         document.getElementById('view404').classList.remove('hidden');
         return;
       }
 
-      // Render Dynamic Site Content
-      document.getElementById('liveTitle').textContent = siteData.title || slug;
-      document.getElementById('liveSubtitle').textContent = siteData.subtitle || '';
-      document.getElementById('liveAuthor').textContent = siteData.author ? `by ${siteData.author}` : '';
-      document.getElementById('liveSlugBadge').textContent = `?site=${siteData.slug}`;
+      // Check if it's a Full Standalone HTML Page or Card Layout
+      const isFullHtml = siteData.contentType === 'html' && (
+        siteData.content.includes('<!DOCTYPE html>') || 
+        siteData.content.includes('<html') || 
+        siteData.content.includes('<head>')
+      );
 
-      // Avatar
-      const avatarImg = document.getElementById('liveAvatarImg');
-      const avatarFallback = document.getElementById('liveAvatarFallback');
-      if (siteData.avatar) {
-        avatarImg.src = siteData.avatar;
-        avatarImg.classList.remove('hidden');
-        avatarFallback.classList.add('hidden');
+      const liveCard = document.getElementById('liveCardArticle');
+      const liveIframeWrap = document.getElementById('liveHtmlIframeContainer');
+      const liveIframe = document.getElementById('liveFullHtmlIframe');
+
+      if (isFullHtml) {
+        // Render inside full responsive sandbox iframe
+        liveCard.classList.add('hidden');
+        liveIframeWrap.classList.remove('hidden');
+        liveIframe.srcdoc = siteData.content;
       } else {
-        avatarImg.classList.add('hidden');
-        avatarFallback.classList.remove('hidden');
-      }
+        liveIframeWrap.classList.add('hidden');
+        liveCard.classList.remove('hidden');
 
-      // Social Links
-      const socialsWrap = document.getElementById('liveSocialsWrap');
-      socialsWrap.innerHTML = '';
-      if (siteData.github) {
-        socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.github)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-github"></i></a>`;
-      }
-      if (siteData.twitter) {
-        socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.twitter)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-twitter-x"></i></a>`;
-      }
-      if (siteData.website) {
-        socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.website)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-globe"></i></a>`;
-      }
+        document.getElementById('liveTitle').textContent = siteData.title || slug;
+        document.getElementById('liveSubtitle').textContent = siteData.subtitle || '';
+        document.getElementById('liveAuthor').textContent = siteData.author ? `by ${siteData.author}` : '';
+        document.getElementById('liveSlugBadge').textContent = `?site=${siteData.slug}`;
 
-      // Render Markdown / HTML sanitized content
-      const rawHtml = marked.parse(siteData.content || '');
-      const cleanHtml = DOMPurify.sanitize(rawHtml);
-      document.getElementById('liveContentBody').innerHTML = cleanHtml;
+        // Avatar
+        const avatarImg = document.getElementById('liveAvatarImg');
+        const avatarFallback = document.getElementById('liveAvatarFallback');
+        if (siteData.avatar) {
+          avatarImg.src = siteData.avatar;
+          avatarImg.classList.remove('hidden');
+          avatarFallback.classList.add('hidden');
+        } else {
+          avatarImg.classList.add('hidden');
+          avatarFallback.classList.remove('hidden');
+        }
+
+        // Socials
+        const socialsWrap = document.getElementById('liveSocialsWrap');
+        socialsWrap.innerHTML = '';
+        if (siteData.github) socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.github)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-github"></i></a>`;
+        if (siteData.twitter) socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.twitter)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-twitter-x"></i></a>`;
+        if (siteData.website) socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.website)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-globe"></i></a>`;
+
+        // Render Markdown / HTML
+        if (siteData.contentType === 'html') {
+          document.getElementById('liveContentBody').innerHTML = DOMPurify.sanitize(siteData.content);
+        } else {
+          const rawHtml = marked.parse(siteData.content || '');
+          document.getElementById('liveContentBody').innerHTML = DOMPurify.sanitize(rawHtml);
+        }
+      }
 
       document.getElementById('viewSiteViewer').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -942,10 +966,96 @@
     }
 
     // -------------------------------------------------------------
-    // 5. DASHBOARD: PUBLISH FORM HANDLER & REAL-TIME PREVIEW
+    // 5. INDEX.HTML FILE UPLOAD & PARSER
+    // -------------------------------------------------------------
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('htmlDropzone').classList.add('drag-active');
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      document.getElementById('htmlDropzone').classList.remove('drag-active');
+    }
+
+    function handleFileDrop(e) {
+      e.preventDefault();
+      document.getElementById('htmlDropzone').classList.remove('drag-active');
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        parseUploadedHtmlFile(files[0]);
+      }
+    }
+
+    function handleFileSelect(e) {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        parseUploadedHtmlFile(files[0]);
+      }
+    }
+
+    function parseUploadedHtmlFile(file) {
+      if (!file.name.endsWith('.html') && !file.name.endsWith('.htm')) {
+        showToast("Please upload an .html or index.html file!");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const htmlContent = event.target.result;
+        
+        // Auto-extract title from HTML <title> tag
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlContent, 'text/html');
+        const extractedTitle = doc.title || file.name.replace(/\.[^/.]+$/, "");
+        
+        // Auto-extract meta description or tagline
+        const metaDesc = doc.querySelector('meta[name="description"]');
+        const extractedSubtitle = metaDesc ? metaDesc.getAttribute('content') : "Uploaded index.html Mini-Page";
+
+        // Generate clean suggested slug from file or title
+        const baseSlug = extractedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const finalSlug = baseSlug || 'my-site';
+
+        // Fill Form
+        document.getElementById('inputSlug').value = finalSlug;
+        document.getElementById('inputTitle').value = extractedTitle;
+        document.getElementById('inputSubtitle').value = extractedSubtitle;
+        document.getElementById('inputContent').value = htmlContent;
+
+        // Switch to HTML mode
+        setContentMode('html');
+        handleSlugInput(finalSlug);
+        updateLivePreview();
+
+        showToast(`✓ Uploaded "${file.name}"! Content and title loaded.`);
+        window.scrollTo({ top: 500, behavior: 'smooth' });
+      };
+      reader.readAsText(file);
+    }
+
+    function setContentMode(mode) {
+      currentContentMode = mode;
+      const mdBtn = document.getElementById('modeMarkdownBtn');
+      const htmlBtn = document.getElementById('modeHtmlBtn');
+      const badge = document.getElementById('contentModeBadge');
+
+      if (mode === 'html') {
+        htmlBtn.className = "px-2.5 py-1 rounded text-xs font-mono font-bold bg-limeAccent-400 text-slate-950 transition-colors";
+        mdBtn.className = "px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-white transition-colors";
+        badge.textContent = "HTML Mode Active (Upload or Raw HTML)";
+      } else {
+        mdBtn.className = "px-2.5 py-1 rounded text-xs font-mono font-bold bg-limeAccent-400 text-slate-950 transition-colors";
+        htmlBtn.className = "px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-white transition-colors";
+        badge.textContent = "Markdown Mode Active";
+      }
+      updateLivePreview();
+    }
+
+    // -------------------------------------------------------------
+    // 6. DASHBOARD: PUBLISH FORM HANDLER & REAL-TIME PREVIEW
     // -------------------------------------------------------------
     function handleSlugInput(val) {
-      // Auto-format slug: lowercase and hyphenated
       const sanitized = val.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
       document.getElementById('inputSlug').value = sanitized;
 
@@ -955,8 +1065,8 @@
     }
 
     function updateLivePreview() {
-      const title = document.getElementById('inputTitle').value.trim() || 'Your Name / Project';
-      const subtitle = document.getElementById('inputSubtitle').value.trim() || 'Role or Catchy Subtitle';
+      const title = document.getElementById('inputTitle').value.trim() || 'My Awesome Project';
+      const subtitle = document.getElementById('inputSubtitle').value.trim() || 'Hosted on Firebase Firestore';
       const avatarUrl = document.getElementById('inputAvatar').value.trim();
       const content = document.getElementById('inputContent').value.trim() || 'Start typing in the creator form to preview...';
 
@@ -984,9 +1094,30 @@
       document.getElementById('previewSocialTwitter').classList.toggle('hidden', !tw);
       document.getElementById('previewSocialWebsite').classList.toggle('hidden', !wb);
 
-      // Render Markdown preview
-      const rawHtml = marked.parse(content);
-      document.getElementById('previewContentBody').innerHTML = DOMPurify.sanitize(rawHtml);
+      // Render Markdown / HTML Preview
+      const previewContent = document.getElementById('previewContentBody');
+      const previewIframe = document.getElementById('previewIframe');
+
+      const isFullHtml = currentContentMode === 'html' && (
+        content.includes('<!DOCTYPE html>') || 
+        content.includes('<html') || 
+        content.includes('<head>')
+      );
+
+      if (isFullHtml) {
+        previewContent.classList.add('hidden');
+        previewIframe.classList.remove('hidden');
+        previewIframe.srcdoc = content;
+      } else {
+        previewIframe.classList.add('hidden');
+        previewContent.classList.remove('hidden');
+        if (currentContentMode === 'html') {
+          previewContent.innerHTML = DOMPurify.sanitize(content);
+        } else {
+          const rawHtml = marked.parse(content);
+          previewContent.innerHTML = DOMPurify.sanitize(rawHtml);
+        }
+      }
     }
 
     async function handlePublish(e) {
@@ -1002,7 +1133,6 @@
       const btnText = document.getElementById('publishBtnText');
       const btnIcon = document.getElementById('publishBtnIcon');
 
-      // Loading state
       publishBtn.disabled = true;
       btnText.textContent = "Publishing to Firestore...";
       btnIcon.className = "bi bi-arrow-repeat animate-spin text-base";
@@ -1016,6 +1146,7 @@
         github: document.getElementById('inputGithub').value.trim(),
         twitter: document.getElementById('inputTwitter').value.trim(),
         website: document.getElementById('inputWebsite').value.trim(),
+        contentType: currentContentMode,
         content: document.getElementById('inputContent').value.trim(),
         updatedAt: new Date().toISOString()
       };
@@ -1023,10 +1154,9 @@
       try {
         await saveSiteToStorage(payload);
 
-        // Success state
         btnText.textContent = "Published!";
         btnIcon.className = "bi bi-check-circle-fill text-base";
-        showToast(`✓ Site published under slug: ${slug}`);
+        showToast(`✓ Site published to Firestore: ${slug}`);
 
         renderRecentSites();
         openSuccessModal(slug);
@@ -1036,14 +1166,14 @@
       } finally {
         setTimeout(() => {
           publishBtn.disabled = false;
-          btnText.textContent = "Publish Page to Firestore";
+          btnText.textContent = "Publish to Firebase Firestore";
           btnIcon.className = "bi bi-cloud-arrow-up-fill text-base";
         }, 1500);
       }
     }
 
     // -------------------------------------------------------------
-    // 6. SUCCESS MODAL & URL COPY
+    // 7. SUCCESS MODAL & URL COPY
     // -------------------------------------------------------------
     function openSuccessModal(slug) {
       const fullUrl = `${window.location.origin}${window.location.pathname}?site=${slug}`;
@@ -1070,9 +1200,10 @@
     }
 
     // -------------------------------------------------------------
-    // 7. TEMPLATES
+    // 8. TEMPLATES
     // -------------------------------------------------------------
     function applyTemplate(type) {
+      setContentMode('markdown');
       if (type === 'developer') {
         document.getElementById('inputSlug').value = 'alex-dev';
         document.getElementById('inputTitle').value = 'Alex Rivera';
@@ -1082,7 +1213,7 @@
         document.getElementById('inputGithub').value = 'https://github.com';
         document.getElementById('inputTwitter').value = 'https://x.com';
         document.getElementById('inputWebsite').value = 'https://vercel.com';
-        document.getElementById('inputContent').value = `## Creative Architect & Systems Developer\n\nI build high-frequency web experiences, reactive user interfaces, and cloud architectures.\n\n### Featured Projects\n- **[HyperDrive UI](https://github.com):** Zero-latency design token library\n- **[Vercel Dynamic Slug Router](https://vercel.com):** Single-page micro-hosting\n\n### Core Stack\n\`TypeScript\` · \`React 19\` · \`Tailwind CSS\` · \`Firebase Firestore\` · \`Node.js\``;
+        document.getElementById('inputContent').value = `## Creative Architect & Systems Developer\n\nI build high-frequency web experiences, reactive user interfaces, and cloud architectures.\n\n### Featured Projects\n- **[HyperDrive UI](https://github.com):** Zero-latency design token library\n- **[MiniHost Platform](https://vercel.com):** Dynamic slug micro-hosting on Firestore\n\n### Core Stack\n\`TypeScript\` · \`React 19\` · \`Tailwind CSS\` · \`Firebase Firestore\` · \`Vercel\``;
       } else if (type === 'creator') {
         document.getElementById('inputSlug').value = 'mia-art';
         document.getElementById('inputTitle').value = 'Mia Chen — Digital Creator';
@@ -1104,7 +1235,7 @@
     }
 
     // -------------------------------------------------------------
-    // 8. RECENT SITES LIST
+    // 9. RECENT SITES LIST
     // -------------------------------------------------------------
     function renderRecentSites() {
       const grid = document.getElementById('recentSitesGrid');
@@ -1116,7 +1247,7 @@
       if (slugs.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full py-8 text-center text-slate-500 font-mono text-xs border border-dashed border-darkBorder rounded-xl">
-            No published sites yet. Fill out the form above to launch your first micro-site!
+            No published sites yet. Fill out the form or drop an index.html file to launch your first micro-site!
           </div>
         `;
         return;
@@ -1131,10 +1262,10 @@
           <div>
             <div class="flex items-center justify-between">
               <span class="text-xs font-mono text-limeAccent-400 font-bold">?site=${slug}</span>
-              <span class="text-[10px] font-mono text-slate-500">Active</span>
+              <span class="text-[10px] font-mono text-slate-500">${item.contentType === 'html' ? 'HTML' : 'Markdown'}</span>
             </div>
             <h4 class="font-bold text-sm text-white mt-1 truncate">${escapeHtml(item.title || slug)}</h4>
-            <p class="text-xs text-slate-400 truncate">${escapeHtml(item.subtitle || 'No subtitle')}</p>
+            <p class="text-xs text-slate-400 truncate">${escapeHtml(item.subtitle || 'Hosted Site')}</p>
           </div>
           <div class="flex items-center justify-between pt-2 border-t border-darkBorder text-xs font-mono">
             <button onclick="editExistingSite('${slug}')" class="text-slate-400 hover:text-white cursor-pointer">
@@ -1164,62 +1295,11 @@
       document.getElementById('inputWebsite').value = data.website || '';
       document.getElementById('inputContent').value = data.content || '';
 
+      setContentMode(data.contentType === 'html' ? 'html' : 'markdown');
       handleSlugInput(data.slug);
       updateLivePreview();
-      window.scrollTo({ top: 300, behavior: 'smooth' });
+      window.scrollTo({ top: 350, behavior: 'smooth' });
       showToast(`Loaded ${slug} into editor!`);
-    }
-
-    // -------------------------------------------------------------
-    // 9. FIREBASE SETTINGS MODAL
-    // -------------------------------------------------------------
-    function openFirebaseConfigModal() {
-      const savedConfig = JSON.parse(localStorage.getItem('minihost_firebase_config') || JSON.stringify(DEFAULT_CONFIG));
-      document.getElementById('cfgApiKey').value = savedConfig.apiKey || '';
-      document.getElementById('cfgProjectId').value = savedConfig.projectId || '';
-      document.getElementById('cfgAuthDomain').value = savedConfig.authDomain || '';
-      document.getElementById('cfgStorageBucket').value = savedConfig.storageBucket || '';
-      document.getElementById('cfgAppId').value = savedConfig.appId || '';
-
-      document.getElementById('firebaseConfigModal').classList.remove('hidden');
-    }
-
-    function closeFirebaseConfigModal() {
-      document.getElementById('firebaseConfigModal').classList.add('hidden');
-    }
-
-    function saveFirebaseConfigFromModal() {
-      const newConfig = {
-        apiKey: document.getElementById('cfgApiKey').value.trim(),
-        projectId: document.getElementById('cfgProjectId').value.trim(),
-        authDomain: document.getElementById('cfgAuthDomain').value.trim(),
-        storageBucket: document.getElementById('cfgStorageBucket').value.trim(),
-        appId: document.getElementById('cfgAppId').value.trim()
-      };
-
-      localStorage.setItem('minihost_firebase_config', JSON.stringify(newConfig));
-      closeFirebaseConfigModal();
-      showToast("✓ Firebase credentials updated!");
-
-      // Re-initialize
-      try {
-        if (firebase.apps.length) {
-          firebase.app().delete().then(() => {
-            initFirebase();
-          });
-        } else {
-          initFirebase();
-        }
-      } catch (e) {
-        window.location.reload();
-      }
-    }
-
-    function resetToDemoStorage() {
-      localStorage.removeItem('minihost_firebase_config');
-      closeFirebaseConfigModal();
-      showToast("Switched to Local Demo mode!");
-      initFirebase();
     }
 
     // -------------------------------------------------------------

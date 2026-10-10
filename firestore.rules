@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() <= 64 && id.matches('^[a-z0-9_-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidMiniSite(data) {
+      return data.slug is string &&
+             data.slug.size() <= 64 &&
+             data.title is string &&
+             data.title.size() <= 200 &&
+             data.content is string &&
+             data.content.size() <= 1000000;
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Mini-sites public hosting collection
+    match /mini_sites/{slug} {
+      // Anyone can view a hosted mini-site by slug
+      allow get: if isValidId(slug);
+      allow list: if true;
+
+      // Anyone can create or update a mini-site with valid schema
+      allow create: if isValidId(slug) &&
+                       isValidMiniSite(incoming()) &&
+                       incoming().slug == slug;
+
+      allow update: if isValidId(slug) &&
+                       isValidMiniSite(incoming()) &&
+                       incoming().slug == slug;
+    }
+  }
+}
