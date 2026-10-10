@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="bn" class="dark">
+<html lang="en" class="dark scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supabase Cloud Uploader | প্রিমিয়াম ফাইল আপলোডার</title>
-  <meta name="description" content="সুপারবেস ক্লাউড স্টোরেজের জন্য একটি আধুনিক ও দ্রুত ফাইল আপলোড সিস্টেম।">
+  <title>MiniHost — Dynamic Mini-Site Builder & Hosting Platform</title>
+  <meta name="description" content="Build, publish, and host dynamic mini-webpages with custom slugs on Vercel backed by Firebase Firestore.">
 
-  <!-- Google Fonts: Plus Jakarta Sans & Tiro Bangla -->
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Bootstrap Icons CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- Tailwind CSS via CDN -->
+  <!-- Tailwind CSS CDN with Custom Lime-White & Dark Palette -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -22,699 +22,1232 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#F0FDF4',
-              100: '#DCFCE7',
-              400: '#4ADE80',
-              500: '#22C55E',
-              600: '#16A34A',
+            limeAccent: {
+              300: '#BEF264',
+              400: '#A3E635',
+              500: '#84CC16',
+              600: '#65A30D',
             },
-            cyanAccent: {
-              400: '#38BDF8',
-              500: '#0EA5E9',
-              600: '#0284C7',
-            },
-            darkBg: '#090D16',
-            cardBg: '#131B2E',
-            cardHover: '#18223B',
+            darkCanvas: '#070A0F',
+            darkCard: '#0F1624',
+            darkCardHover: '#151F33',
+            darkBorder: '#1E293B',
           },
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', '"Tiro Bangla"', 'system-ui', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
           }
         }
       }
     }
   </script>
 
-  <!-- Supabase JS Client CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Marked.js for Markdown Rendering & DOMPurify for XSS Protection -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+
+  <!-- Firebase App & Cloud Firestore (Compat SDK for robust single-file deployment) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', 'Tiro Bangla', system-ui, -apple-system, sans-serif;
-      background-color: #090D16;
-      color: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #070A0F;
+      color: #F8FAFC;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* Ambient background glows */
-    .glow-radial-cyan {
-      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, rgba(9, 13, 22, 0) 65%);
+    /* Ambient Lime & Cyber Shimmers */
+    .glow-lime {
+      background: radial-gradient(circle at 50% 0%, rgba(163, 230, 53, 0.12) 0%, rgba(7, 10, 15, 0) 65%);
     }
 
-    .glow-radial-emerald {
-      background: radial-gradient(circle at 50% 100%, rgba(34, 197, 94, 0.12) 0%, rgba(9, 13, 22, 0) 60%);
+    .glow-slate {
+      background: radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.08) 0%, rgba(7, 10, 15, 0) 50%);
     }
 
-    /* Animated dashed border for dropzone */
-    .dropzone-border {
-      background-image: repeating-linear-gradient(0deg, #334155, #334155 12px, transparent 12px, transparent 20px),
-                        repeating-linear-gradient(90deg, #334155, #334155 12px, transparent 12px, transparent 20px),
-                        repeating-linear-gradient(180deg, #334155, #334155 12px, transparent 12px, transparent 20px),
-                        repeating-linear-gradient(270deg, #334155, #334155 12px, transparent 12px, transparent 20px);
-      background-size: 2px 100%, 100% 2px, 2px 100%, 100% 2px;
-      background-position: 0 0, 0 0, 100% 0, 0 100%;
-      background-repeat: no-repeat;
-    }
-
-    .dropzone-border.drag-over {
-      background-image: repeating-linear-gradient(0deg, #38BDF8, #38BDF8 12px, transparent 12px, transparent 20px),
-                        repeating-linear-gradient(90deg, #38BDF8, #38BDF8 12px, transparent 12px, transparent 20px),
-                        repeating-linear-gradient(180deg, #38BDF8, #38BDF8 12px, transparent 12px, transparent 20px),
-                        repeating-linear-gradient(270deg, #38BDF8, #38BDF8 12px, transparent 12px, transparent 20px);
-    }
-
-    /* Glass card border */
+    /* Glass Card styling */
     .glass-card {
-      background: linear-gradient(180deg, rgba(26, 36, 61, 0.75) 0%, rgba(17, 24, 43, 0.85) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(15, 22, 36, 0.8) 0%, rgba(10, 15, 25, 0.9) 100%);
+      border: 1px solid rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .glass-card:hover {
-      border-color: rgba(56, 189, 248, 0.35);
+      border-color: rgba(163, 230, 53, 0.35);
+    }
+
+    /* Lime Gradient Text */
+    .text-gradient-lime {
+      background: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 40%, #A3E635 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
     }
     ::-webkit-scrollbar-track {
-      background: #090D16;
+      background: #070A0F;
     }
     ::-webkit-scrollbar-thumb {
-      background: #25334E;
+      background: #1E293B;
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #38BDF8;
+      background: #A3E635;
     }
+
+    /* Rendered User Content Markdown Styles */
+    .user-content h1 { font-size: 1.875rem; font-weight: 800; color: #FFFFFF; margin-top: 1.25rem; margin-bottom: 0.75rem; }
+    .user-content h2 { font-size: 1.5rem; font-weight: 700; color: #F8FAFC; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .user-content h3 { font-size: 1.25rem; font-weight: 600; color: #E2E8F0; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+    .user-content p { color: #CBD5E1; line-height: 1.7; margin-bottom: 1rem; font-size: 0.95rem; }
+    .user-content a { color: #A3E635; text-decoration: underline; text-underline-offset: 4px; font-weight: 600; }
+    .user-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; color: #CBD5E1; }
+    .user-content ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 1rem; color: #CBD5E1; }
+    .user-content li { margin-bottom: 0.25rem; }
+    .user-content blockquote { border-left: 3px solid #A3E635; padding-left: 1rem; font-style: italic; color: #94A3B8; margin: 1rem 0; }
+    .user-content code { background-color: #1E293B; color: #BEF264; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+    .user-content pre { background-color: #0F172A; border: 1px solid #1E293B; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+    .user-content pre code { background: transparent; padding: 0; color: #E2E8F0; }
+    .user-content img { max-width: 100%; height: auto; border-radius: 0.5rem; border: 1px solid #1E293B; margin: 1rem 0; }
   </style>
 </head>
 
-<body class="flex flex-col min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200">
+<body class="flex flex-col min-h-screen selection:bg-lime-400/30 selection:text-lime-200">
 
-  <!-- Background Glow Orbs -->
-  <div class="fixed inset-0 glow-radial-cyan pointer-events-none"></div>
-  <div class="fixed inset-0 glow-radial-emerald pointer-events-none"></div>
+  <!-- Ambient Light Fields -->
+  <div class="fixed inset-0 glow-lime pointer-events-none"></div>
+  <div class="fixed inset-0 glow-slate pointer-events-none"></div>
 
-  <!-- ================= TOP HEADER ================= -->
-  <header class="relative z-20 w-full border-b border-slate-800/80 bg-darkBg/80 backdrop-blur-md">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+  <!-- ================= TOP HEADER (NAVBAR) ================= -->
+  <header class="sticky top-0 z-40 w-full border-b border-darkBorder/80 bg-darkCanvas/90 backdrop-blur-xl">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-sky-400 p-0.5 shadow-lg shadow-cyan-500/20">
-          <div class="w-full h-full bg-[#0D1322] rounded-[10px] flex items-center justify-center">
-            <i class="bi bi-cloud-arrow-up-fill text-xl text-cyan-400"></i>
+      <!-- Brand Logo & Identity -->
+      <a href="#" onclick="navigateToDashboard(event)" class="flex items-center gap-3 group text-decoration-none">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-limeAccent-500 via-limeAccent-400 to-white p-0.5 shadow-lg shadow-limeAccent-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-darkCanvas rounded-[10px] flex items-center justify-center">
+            <i class="bi bi-layers-fill text-limeAccent-400 text-lg"></i>
           </div>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-bold text-lg text-white tracking-wide">সুপারবেস ক্লাউড ড্রাইভ</span>
-            <span class="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">v2.0</span>
+            <span class="font-bold text-lg text-white tracking-tight">Mini<span class="text-limeAccent-400">Host</span></span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30 rounded-full">v1.0</span>
           </div>
-          <p class="text-xs text-slate-400">হাই-স্পিড ক্লাউড স্টোরেজ ও পাবলিক লিংক জেনারেটর</p>
+          <p class="text-[11px] text-slate-400 font-mono">Dynamic Slugs · Vercel Ready</p>
         </div>
-      </div>
+      </a>
 
-      <!-- Live Connection Pill -->
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-xs font-mono text-emerald-400 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="hidden sm:inline">Supabase Storage</span>
-        <span class="text-slate-500">|</span>
-        <span class="text-slate-300">Bucket: My file</span>
+      <!-- Right Header Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Firebase Status Pill -->
+        <button 
+          onclick="openFirebaseConfigModal()"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400/40 text-xs font-mono transition-colors text-slate-300"
+          title="Configure Firebase Credentials"
+        >
+          <span id="firebaseStatusDot" class="w-2 h-2 rounded-full bg-limeAccent-400 animate-pulse"></span>
+          <span id="firebaseStatusText" class="hidden sm:inline">Firestore Connected</span>
+          <i class="bi bi-gear-fill text-slate-400 text-xs"></i>
+        </button>
+
+        <!-- New Page Action Button -->
+        <button 
+          id="headerNewPageBtn"
+          onclick="navigateToDashboard(event)"
+          class="px-4 py-2 rounded-lg bg-limeAccent-400 hover:bg-limeAccent-300 text-slate-950 font-bold text-xs shadow-md shadow-limeAccent-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+        >
+          <i class="bi bi-plus-lg"></i>
+          <span>Create Page</span>
+        </button>
       </div>
 
     </div>
   </header>
 
-  <!-- ================= MAIN CONTENT ================= -->
-  <main class="relative z-10 flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex flex-col items-center">
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main id="appContainer" class="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">
 
-    <!-- Hero Title -->
-    <div class="text-center max-w-xl mx-auto mb-8 sm:mb-10">
-      <h1 class="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-300 tracking-tight">
-        যেকোনো ফাইল নিমেষেই আপলোড করুন
-      </h1>
-      <p class="mt-2.5 text-sm sm:text-base text-slate-400 leading-relaxed">
-        ছবি, ভিডিও, পিডিএফ, জিপ বা ডকুমেন্ট টেনে এনে ড্রপ করুন এবং সরাসরি শেয়ারযোগ্য ইনস্ট্যান্ট পাবলিক ডাউনলোড লিংক সংগ্রহ করুন।
-      </p>
-    </div>
-
-    <!-- Upload Panel Card -->
-    <div class="w-full max-w-xl glass-card rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden transition-all duration-300">
+    <!-- ------------------------------------------------------------- -->
+    <!-- 1. CREATOR DASHBOARD VIEW (Shown by default on home)          -->
+    <!-- ------------------------------------------------------------- -->
+    <div id="viewDashboard" class="space-y-10">
       
-      <!-- Top Decorative Glow Edge -->
-      <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-72 h-16 bg-cyan-500/20 blur-2xl rounded-full pointer-events-none"></div>
+      <!-- Hero Intro -->
+      <div class="text-center max-w-2xl mx-auto space-y-3">
+        <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30">
+          Instant Dynamic Page Builder
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-gradient-lime tracking-tight leading-tight">
+          Build & Host Your Mini-Page With a Custom Slug
+        </h1>
+        <p class="text-sm sm:text-base text-slate-400 leading-relaxed">
+          Create portfolio cards, personal bio links, docs, or landing pages. Everything is mapped to your unique slug on Firestore and accessible via <span class="text-limeAccent-400 font-mono">?site=your-slug</span> on Vercel.
+        </p>
+      </div>
 
-      <!-- Drag & Drop Zone -->
-      <div 
-        id="dropZone"
-        onclick="document.getElementById('fileInput').click()"
-        ondragover="handleDragOver(event)"
-        ondragleave="handleDragLeave(event)"
-        ondrop="handleDrop(event)"
-        class="dropzone-border rounded-xl p-8 text-center cursor-pointer transition-all duration-300 bg-slate-900/40 hover:bg-slate-900/70 group relative"
-      >
-        <input 
-          type="file" 
-          id="fileInput" 
-          onchange="handleFileSelect(event)" 
-          class="hidden" 
-        />
+      <!-- Quick Template Selector Strip -->
+      <div class="flex items-center justify-center gap-2 flex-wrap">
+        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider mr-1">Quick Templates:</span>
+        <button onclick="applyTemplate('developer')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors">
+          💻 Developer Portfolio
+        </button>
+        <button onclick="applyTemplate('creator')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors">
+          🎨 Creator Bio & Links
+        </button>
+        <button onclick="applyTemplate('product')" class="px-3 py-1.5 rounded-lg bg-darkCard border border-darkBorder hover:border-limeAccent-400 text-xs text-slate-300 hover:text-white transition-colors">
+          🚀 Product Launch
+        </button>
+      </div>
 
-        <div id="dropPrompt" class="space-y-4">
-          <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-3xl group-hover:scale-110 group-hover:border-cyan-400 transition-transform duration-300 shadow-inner">
-            <i class="bi bi-cloud-arrow-up"></i>
+      <!-- Creator Grid: Form (Left) & Live Preview (Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Creator Form Panel (7 cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl">
+          <div class="flex items-center justify-between pb-4 border-b border-darkBorder">
+            <div class="flex items-center gap-2.5">
+              <i class="bi bi-pencil-square text-limeAccent-400 text-lg"></i>
+              <h2 class="text-lg font-bold text-white">Page Configuration</h2>
+            </div>
+            <span class="text-xs font-mono text-slate-400">Step 1 of 2</span>
           </div>
-          <div>
-            <p class="text-base font-semibold text-white group-hover:text-cyan-300 transition-colors">
-              ফাইলটি টেনে এনে এখানে ছেড়ে দিন
-            </p>
-            <p class="text-xs text-slate-400 mt-1">
-              অথবা আপনার ডিভাইস থেকে সিলেক্ট করতে <span class="text-cyan-400 font-semibold underline underline-offset-4">ক্লিক করুন</span>
-            </p>
-          </div>
-          <div class="flex items-center justify-center gap-2 pt-2 text-[11px] text-slate-500 font-mono">
-            <span>PNG, JPG, PDF, MP4, ZIP, DOCX</span>
-            <span>·</span>
-            <span>সর্বোচ্চ ৫০ এমবি</span>
-          </div>
-        </div>
 
-        <!-- Selected File Preview Container (Hidden initially) -->
-        <div id="filePreviewContainer" class="hidden text-left space-y-4">
-          <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/80 border border-cyan-500/30">
-            <div class="flex items-center gap-3.5 overflow-hidden">
-              <!-- Thumbnail or Generic Icon -->
-              <div id="fileThumbWrapper" class="w-12 h-12 rounded-lg bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
-                <i id="fileTypeIcon" class="bi bi-file-earmark-text text-2xl text-cyan-400"></i>
-                <img id="imageThumbnail" class="hidden w-full h-full object-cover" alt="Selected Preview" />
+          <form id="creatorForm" onsubmit="handlePublish(event)" class="space-y-5">
+            
+            <!-- Slug Input with Dynamic Live Domain Preview -->
+            <div class="space-y-2">
+              <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                Desired Slug (Site Identifier) <span class="text-limeAccent-400">*</span>
+              </label>
+              <div class="flex items-center rounded-xl bg-darkCanvas border border-darkBorder focus-within:border-limeAccent-400 transition-colors overflow-hidden">
+                <span class="px-3.5 py-2.5 text-xs font-mono text-slate-500 border-r border-darkBorder select-none">
+                  ?site=
+                </span>
+                <input 
+                  type="text" 
+                  id="inputSlug" 
+                  required
+                  placeholder="alex-portfolio" 
+                  oninput="handleSlugInput(this.value)"
+                  class="flex-1 px-3 py-2.5 bg-transparent text-sm text-limeAccent-400 font-mono placeholder-slate-600 focus:outline-none"
+                />
               </div>
-              <div class="overflow-hidden">
-                <p id="previewFileName" class="text-sm font-semibold text-white truncate max-w-[260px] sm:max-w-xs"></p>
-                <div class="flex items-center gap-2 text-xs text-slate-400 font-mono mt-0.5">
-                  <span id="previewFileSize">0 KB</span>
-                  <span>·</span>
-                  <span id="previewFileType" class="text-cyan-400 uppercase">FILE</span>
-                </div>
+              <p class="text-[11px] text-slate-500 flex items-center justify-between font-mono">
+                <span>Allowed: lowercase letters, numbers, and hyphens (-)</span>
+                <span id="slugAvailabilityBadge" class="text-slate-400 font-semibold">Live Preview Active</span>
+              </p>
+            </div>
+
+            <!-- Page Title & Subtitle -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                  Page Title <span class="text-limeAccent-400">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="inputTitle" 
+                  required
+                  placeholder="e.g. Alex Rivera" 
+                  oninput="updateLivePreview()"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                  Subtitle / Role
+                </label>
+                <input 
+                  type="text" 
+                  id="inputSubtitle" 
+                  placeholder="e.g. Full-Stack Architect" 
+                  oninput="updateLivePreview()"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
+                />
               </div>
             </div>
 
-            <!-- Remove / Change File Button -->
+            <!-- Author & Avatar / Logo URL -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                  Author / Brand Name
+                </label>
+                <input 
+                  type="text" 
+                  id="inputAuthor" 
+                  placeholder="e.g. Alex Rivera Studio" 
+                  oninput="updateLivePreview()"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                  Avatar / Image URL
+                </label>
+                <input 
+                  type="url" 
+                  id="inputAvatar" 
+                  placeholder="https://images.unsplash.com/..." 
+                  oninput="updateLivePreview()"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors"
+                />
+              </div>
+            </div>
+
+            <!-- Social Links (Optional) -->
+            <div class="space-y-2">
+              <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                Social Links (Optional)
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input 
+                  type="text" 
+                  id="inputGithub" 
+                  placeholder="GitHub URL / Username" 
+                  oninput="updateLivePreview()"
+                  class="px-3 py-2 rounded-xl bg-darkCanvas border border-darkBorder text-xs text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400"
+                />
+                <input 
+                  type="text" 
+                  id="inputTwitter" 
+                  placeholder="Twitter / X URL" 
+                  oninput="updateLivePreview()"
+                  class="px-3 py-2 rounded-xl bg-darkCanvas border border-darkBorder text-xs text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400"
+                />
+                <input 
+                  type="text" 
+                  id="inputWebsite" 
+                  placeholder="Personal Website URL" 
+                  oninput="updateLivePreview()"
+                  class="px-3 py-2 rounded-xl bg-darkCanvas border border-darkBorder text-xs text-white placeholder-slate-600 focus:outline-none focus:border-limeAccent-400"
+                />
+              </div>
+            </div>
+
+            <!-- Content Area (Markdown & HTML Supported) -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-mono uppercase text-slate-300 font-semibold tracking-wider">
+                  Page Content (Markdown or HTML) <span class="text-limeAccent-400">*</span>
+                </label>
+                <span class="text-[11px] text-slate-400 font-mono">Markdown formatting supported</span>
+              </div>
+              <textarea 
+                id="inputContent" 
+                rows="8" 
+                required
+                oninput="updateLivePreview()"
+                placeholder="# Welcome to my digital space&#10;&#10;Here you can write your story, project highlights, or embedded HTML." 
+                class="w-full p-4 rounded-xl bg-darkCanvas border border-darkBorder text-sm text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-limeAccent-400 transition-colors leading-relaxed"
+              ></textarea>
+            </div>
+
+            <!-- Publish Button -->
             <button 
-              type="button" 
-              onclick="clearSelectedFile(event)" 
-              class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-              title="ফাইল বাতিল করুন"
+              type="submit" 
+              id="publishBtn"
+              class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-limeAccent-400 via-limeAccent-500 to-limeAccent-400 hover:from-limeAccent-300 hover:to-limeAccent-400 text-slate-950 font-bold text-sm tracking-wide shadow-lg shadow-limeAccent-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
             >
-              <i class="bi bi-trash3 text-base"></i>
+              <i id="publishBtnIcon" class="bi bi-cloud-arrow-up-fill text-base"></i>
+              <span id="publishBtnText">Publish Page to Firestore</span>
             </button>
-          </div>
+
+          </form>
         </div>
-      </div>
 
-      <!-- Action Button -->
-      <div class="mt-6 space-y-3">
-        <button 
-          id="uploadBtn"
-          onclick="uploadFile()"
-          disabled
-          class="w-full py-3.5 px-6 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2.5 bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
-        >
-          <i class="bi bi-arrow-up-circle-fill text-base"></i>
-          <span id="uploadBtnText">একটি ফাইল নির্বাচন করুন</span>
-        </button>
-
-        <!-- Progress Bar (Visible while uploading) -->
-        <div id="progressWrapper" class="hidden space-y-2 pt-2">
-          <div class="flex items-center justify-between text-xs font-mono text-slate-400">
-            <span class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              <span id="progressStatusText">সুপারবেস স্টোরেজে আপলোড হচ্ছে...</span>
+        <!-- Live Device Preview (5 cols sticky) -->
+        <div class="lg:col-span-5 sticky top-28 space-y-4">
+          <div class="flex items-center justify-between px-2">
+            <span class="text-xs font-mono uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-limeAccent-400 animate-ping"></span>
+              Real-Time Preview
             </span>
-            <span id="progressPercent" class="text-cyan-400 font-bold">45%</span>
+            <span class="text-xs font-mono text-slate-500" id="previewSlugIndicator">mysite.vercel.app/?site=alex-portfolio</span>
           </div>
-          <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700/60">
-            <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 45%;"></div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Result Card (Shown after upload) -->
-      <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-800/80 space-y-4">
-        
-        <!-- Success Banner -->
-        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3.5">
-          <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-            <i class="bi bi-check-lg text-lg"></i>
-          </div>
-          <div class="flex-1">
-            <h4 class="text-sm font-bold text-emerald-400">ফাইল সফলভাবে আপলোড সম্পন্ন হয়েছে!</h4>
-            <p class="text-xs text-slate-300 mt-0.5">আপনার ফাইলটি ক্লাউডে সংরক্ষিত এবং সরাসরি শেয়ার করার জন্য প্রস্তুত।</p>
-          </div>
-        </div>
+          <!-- Preview Frame Shell -->
+          <div class="rounded-2xl border border-darkBorder bg-darkCanvas overflow-hidden shadow-2xl p-1">
+            
+            <!-- Window Titlebar -->
+            <div class="px-4 py-2.5 bg-darkCard border-b border-darkBorder flex items-center justify-between text-xs font-mono text-slate-400">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+              </div>
+              <span class="truncate max-w-[200px] text-slate-400 text-[11px]" id="previewBarUrl">/site/alex-portfolio</span>
+              <i class="bi bi-arrow-repeat text-slate-500"></i>
+            </div>
 
-        <!-- Copyable Public Link Box -->
-        <div class="space-y-1.5">
-          <label class="block text-xs font-mono uppercase text-slate-400 tracking-wider">পাবলিক ডাউনলোড লিংক</label>
-          <div class="flex items-center gap-2 p-1.5 rounded-xl bg-slate-900 border border-cyan-500/30">
-            <input 
-              id="fileUrlInput" 
-              type="text" 
-              readonly 
-              class="flex-1 px-3 py-1.5 bg-transparent text-cyan-300 text-xs font-mono focus:outline-none truncate" 
-            />
-            <button 
-              id="copyBtn"
-              onclick="copyPublicUrl()" 
-              class="px-3.5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-md shrink-0 cursor-pointer"
-            >
-              <i class="bi bi-clipboard-check"></i>
-              <span id="copyBtnText">কপি লিংক</span>
-            </button>
+            <!-- Preview Canvas Body -->
+            <div id="previewCardBody" class="p-6 sm:p-7 space-y-6 max-h-[560px] overflow-y-auto">
+              <!-- Avatar & Title Lockup -->
+              <div class="flex items-center gap-4">
+                <div id="previewAvatarWrap" class="w-14 h-14 rounded-full bg-slate-800 border-2 border-limeAccent-400 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                  <i id="previewAvatarDefault" class="bi bi-person-fill text-2xl text-slate-400"></i>
+                  <img id="previewAvatarImg" class="hidden w-full h-full object-cover" alt="Preview Avatar" />
+                </div>
+                <div class="overflow-hidden">
+                  <h3 id="previewTitle" class="text-lg font-bold text-white truncate">Alex Rivera</h3>
+                  <p id="previewSubtitle" class="text-xs text-limeAccent-400 font-medium truncate">Full-Stack Architect & Designer</p>
+                </div>
+              </div>
+
+              <!-- Social Links Preview -->
+              <div id="previewSocialsWrap" class="flex items-center gap-3 text-sm text-slate-400 pt-1 border-t border-darkBorder/60">
+                <span id="previewSocialGithub" class="hidden hover:text-white"><i class="bi bi-github"></i></span>
+                <span id="previewSocialTwitter" class="hidden hover:text-white"><i class="bi bi-twitter-x"></i></span>
+                <span id="previewSocialWebsite" class="hidden hover:text-white"><i class="bi bi-globe"></i></span>
+              </div>
+
+              <!-- Content Body Preview -->
+              <div id="previewContentBody" class="user-content text-xs text-slate-300 leading-relaxed border-t border-darkBorder/60 pt-4">
+                <p>Start typing in the creator form to see your mini-page preview update automatically...</p>
+              </div>
+            </div>
+
           </div>
-        </div>
-
-        <!-- Action Links: View & Re-upload -->
-        <div class="flex items-center gap-3 pt-1">
-          <a 
-            id="viewFileLink" 
-            href="#" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-200 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 flex items-center justify-center gap-2 transition-colors text-center"
-          >
-            <i class="bi bi-box-arrow-up-right text-cyan-400"></i>
-            <span>ফাইলটি সরাসরি ওপেন করুন</span>
-          </a>
-
-          <button 
-            type="button" 
-            onclick="resetUploader()" 
-            class="py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 transition-colors cursor-pointer"
-          >
-            <i class="bi bi-plus-circle mr-1"></i> নতুন ফাইল
-          </button>
         </div>
 
       </div>
 
-      <!-- Error Card (Shown on error) -->
-      <div id="errorCard" class="hidden mt-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3.5">
-        <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
-          <i class="bi bi-exclamation-triangle-fill"></i>
+      <!-- Published Sites History Section -->
+      <div id="recentSitesSection" class="pt-8 border-t border-darkBorder space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="bi bi-clock-history text-limeAccent-400"></i>
+            <h3 class="text-base font-bold text-white">Your Published Sites</h3>
+          </div>
+          <span class="text-xs font-mono text-slate-500">Saved in this browser & Firestore</span>
         </div>
-        <div class="flex-1">
-          <h4 class="text-sm font-bold text-rose-400">আপলোড ব্যর্থ হয়েছে</h4>
-          <p id="errorMessage" class="text-xs text-slate-300 mt-0.5 leading-relaxed">কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।</p>
+
+        <div id="recentSitesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Dynamically populated via JS -->
         </div>
       </div>
 
     </div>
 
-    <!-- ================= RECENT UPLOADS HISTORY ================= -->
-    <div class="w-full max-w-xl mt-12 space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-        <div class="flex items-center gap-2">
-          <i class="bi bi-clock-history text-cyan-400"></i>
-          <h3 class="text-sm font-bold text-white">সদ্য আপলোডকৃত ফাইলসমূহ</h3>
-        </div>
-        <button 
-          id="clearHistoryBtn" 
-          onclick="clearHistory()" 
-          class="text-[11px] font-mono text-slate-500 hover:text-rose-400 transition-colors hidden cursor-pointer"
-        >
-          ইতিহাস মুছুন
-        </button>
+    <!-- ------------------------------------------------------------- -->
+    <!-- 2. DYNAMIC SITE VIEWER (Rendered when ?site=slug is loaded)    -->
+    <!-- ------------------------------------------------------------- -->
+    <div id="viewSiteViewer" class="hidden max-w-3xl mx-auto space-y-8">
+      
+      <!-- Back to Dashboard Pill -->
+      <div class="flex items-center justify-between">
+        <a href="#" onclick="navigateToDashboard(event)" class="inline-flex items-center gap-2 text-xs font-mono text-slate-400 hover:text-limeAccent-400 transition-colors">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to MiniHost Dashboard</span>
+        </a>
+        <span class="px-2.5 py-0.5 rounded-full bg-limeAccent-400/10 text-limeAccent-400 border border-limeAccent-400/30 text-[11px] font-mono">
+          Live Hosted Site
+        </span>
       </div>
 
-      <div id="historyList" class="space-y-2.5">
-        <!-- Empty Placeholder -->
-        <div id="historyEmpty" class="text-center py-8 text-xs text-slate-500 space-y-1">
-          <i class="bi bi-folder2-open text-2xl text-slate-600 block mb-1"></i>
-          <p>এখনো কোনো ফাইল আপলোড করা হয়নি।</p>
+      <!-- Live Site Card Container -->
+      <article class="glass-card rounded-3xl p-8 sm:p-12 shadow-2xl border border-darkBorder space-y-8 relative overflow-hidden">
+        
+        <!-- Ambient Header Light -->
+        <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-24 bg-limeAccent-400/15 blur-3xl rounded-full pointer-events-none"></div>
+
+        <!-- Site Header Lockup -->
+        <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 pb-6 border-b border-darkBorder">
+          <!-- Avatar Frame -->
+          <div id="liveAvatarWrap" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-900 border-2 border-limeAccent-400 overflow-hidden shrink-0 flex items-center justify-center shadow-xl shadow-limeAccent-500/10">
+            <i id="liveAvatarFallback" class="bi bi-person-fill text-4xl text-slate-500"></i>
+            <img id="liveAvatarImg" class="hidden w-full h-full object-cover" alt="Site Avatar" />
+          </div>
+
+          <div class="flex-1 space-y-1.5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h1 id="liveTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Site Title</h1>
+              <span id="liveSlugBadge" class="text-xs font-mono px-2.5 py-1 bg-darkCanvas border border-darkBorder rounded-lg text-limeAccent-400 self-center sm:self-auto">
+                ?site=slug
+              </span>
+            </div>
+            <p id="liveSubtitle" class="text-sm sm:text-base font-medium text-slate-300">Subtitle / Tagline</p>
+            <p id="liveAuthor" class="text-xs font-mono text-slate-500">by Author Name</p>
+
+            <!-- Social Links Strip -->
+            <div id="liveSocialsWrap" class="flex items-center justify-center sm:justify-start gap-4 pt-3 text-base text-slate-400">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
         </div>
+
+        <!-- Rendered Content Body -->
+        <div id="liveContentBody" class="user-content text-slate-200 text-sm sm:text-base leading-relaxed space-y-4">
+          <!-- Rendered Markdown/HTML -->
+        </div>
+
+        <!-- Footer Ribbon -->
+        <div class="pt-8 border-t border-darkBorder/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+          <div>
+            Hosted on <span class="text-limeAccent-400 font-bold">MiniHost</span> via Vercel & Firebase
+          </div>
+          <button onclick="navigateToDashboard(event)" class="text-slate-400 hover:text-white underline underline-offset-4 cursor-pointer">
+            Create your own mini-page →
+          </button>
+        </div>
+
+      </article>
+
+    </div>
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 3. 404 SITE NOT FOUND STATE                                   -->
+    <!-- ------------------------------------------------------------- -->
+    <div id="view404" class="hidden max-w-lg mx-auto text-center py-16 space-y-6">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-4xl shadow-xl shadow-rose-500/10">
+        <i class="bi bi-exclamation-octagon"></i>
       </div>
+
+      <div class="space-y-2">
+        <span class="text-xs font-mono text-rose-400 font-bold uppercase tracking-widest">404 Error</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Mini-Site Not Found</h2>
+        <p class="text-sm text-slate-400 max-w-md mx-auto">
+          The requested site <span id="notFoundSlug" class="text-limeAccent-400 font-mono font-bold">?site=unknown</span> does not exist yet in the database.
+        </p>
+      </div>
+
+      <div class="pt-4 flex items-center justify-center gap-4">
+        <button 
+          id="claimSlugBtn"
+          onclick="claimCurrentSlug()" 
+          class="px-6 py-3 rounded-xl bg-limeAccent-400 hover:bg-limeAccent-300 text-slate-950 font-bold text-xs shadow-lg shadow-limeAccent-500/20 transition-all cursor-pointer flex items-center gap-2"
+        >
+          <i class="bi bi-lightning-charge-fill"></i>
+          <span>Create This Slug Now</span>
+        </button>
+
+        <a 
+          href="#" 
+          onclick="navigateToDashboard(event)"
+          class="px-5 py-3 rounded-xl bg-darkCard border border-darkBorder hover:border-slate-600 text-slate-300 font-semibold text-xs transition-colors"
+        >
+          Go to Home
+        </a>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 4. LOADING STATE SPINNER                                      -->
+    <!-- ------------------------------------------------------------- -->
+    <div id="viewLoading" class="hidden py-32 text-center space-y-4">
+      <div class="w-12 h-12 mx-auto rounded-full border-3 border-darkBorder border-t-limeAccent-400 animate-spin"></div>
+      <p class="text-sm font-mono text-slate-400">Looking up site from Firebase Firestore...</p>
     </div>
 
   </main>
 
+  <!-- ================= PUBLISHED SUCCESS MODAL ================= -->
+  <div id="successModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="relative w-full max-w-md bg-darkCard border border-limeAccent-400/40 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 text-center">
+      
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-limeAccent-400/10 border border-limeAccent-400/30 flex items-center justify-center text-limeAccent-400 text-3xl shadow-inner">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-bold text-white">Your Mini-Page Is Live!</h3>
+        <p class="text-xs text-slate-400 mt-1">Saved to Firestore under your unique slug.</p>
+      </div>
+
+      <!-- Public URL Copy Box -->
+      <div class="space-y-1.5 text-left">
+        <label class="block text-[11px] font-mono uppercase text-slate-400 tracking-wider">Live URL</label>
+        <div class="flex items-center gap-2 p-1.5 rounded-xl bg-darkCanvas border border-darkBorder focus-within:border-limeAccent-400">
+          <input 
+            type="text" 
+            id="modalUrlInput" 
+            readonly 
+            class="flex-1 px-3 py-1.5 bg-transparent text-limeAccent-400 text-xs font-mono focus:outline-none truncate" 
+          />
+          <button 
+            onclick="copyModalUrl()" 
+            class="px-3.5 py-1.5 rounded-lg bg-limeAccent-400 hover:bg-limeAccent-300 text-slate-950 font-bold text-xs transition-colors shrink-0 cursor-pointer"
+          >
+            <span id="modalCopyBtnText">Copy</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <a 
+          id="modalOpenTabBtn" 
+          href="#" 
+          target="_blank" 
+          class="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+        >
+          <i class="bi bi-box-arrow-up-right"></i>
+          <span>Open Live Site</span>
+        </a>
+        <button 
+          onclick="closeSuccessModal()" 
+          class="py-3 px-4 rounded-xl bg-darkCard border border-darkBorder hover:border-slate-600 text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+        >
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= FIREBASE CONFIG MODAL ================= -->
+  <div id="firebaseConfigModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-lg bg-darkCard border border-darkBorder rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-darkBorder">
+        <div class="flex items-center gap-2.5">
+          <i class="bi bi-fire text-amber-400 text-xl"></i>
+          <div>
+            <h3 class="text-base font-bold text-white">Firebase Firestore Configuration</h3>
+            <p class="text-[11px] text-slate-400">Connect your own Firebase project credentials</p>
+          </div>
+        </div>
+        <button onclick="closeFirebaseConfigModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <p class="text-slate-300 leading-relaxed font-sans text-xs">
+          Enter your Firebase Project configuration below (from Firebase Console &gt; Project Settings &gt; General &gt; Your apps).
+        </p>
+
+        <div class="space-y-1">
+          <label class="text-slate-400 uppercase text-[10px]">API Key</label>
+          <input type="text" id="cfgApiKey" placeholder="AIzaSy..." class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-slate-400 uppercase text-[10px]">Project ID</label>
+            <input type="text" id="cfgProjectId" placeholder="my-minihost-app" class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-slate-400 uppercase text-[10px]">Auth Domain</label>
+            <input type="text" id="cfgAuthDomain" placeholder="my-app.firebaseapp.com" class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-slate-400 uppercase text-[10px]">Storage Bucket</label>
+            <input type="text" id="cfgStorageBucket" placeholder="my-app.appspot.com" class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-slate-400 uppercase text-[10px]">App ID</label>
+            <input type="text" id="cfgAppId" placeholder="1:123456789:web:abcdef..." class="w-full px-3 py-2 bg-darkCanvas border border-darkBorder rounded-lg text-white" />
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-darkBorder flex items-center justify-between gap-3">
+        <button 
+          onclick="resetToDemoStorage()" 
+          class="px-3.5 py-2 text-xs font-mono text-slate-400 hover:text-white transition-colors cursor-pointer"
+        >
+          Use Local Demo Mode
+        </button>
+        <button 
+          onclick="saveFirebaseConfigFromModal()" 
+          class="px-5 py-2.5 rounded-xl bg-limeAccent-400 hover:bg-limeAccent-300 text-slate-950 font-bold text-xs transition-colors cursor-pointer"
+        >
+          Save & Re-Connect
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div 
+    id="toastBox" 
+    class="fixed bottom-6 right-6 z-50 hidden px-4 py-3 bg-darkCard border border-limeAccent-400/40 text-white text-xs font-mono rounded-xl shadow-2xl shadow-limeAccent-500/20 flex items-center gap-2.5 transition-all transform duration-300"
+  >
+    <i class="bi bi-check-circle-fill text-limeAccent-400 text-base"></i>
+    <span id="toastMsg">Operation Successful</span>
+  </div>
+
   <!-- ================= FOOTER ================= -->
-  <footer class="relative z-10 w-full border-t border-slate-800/80 bg-darkBg/90 py-6 text-xs text-slate-500 text-center">
-    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p>© 2026 Supabase File Hub. পাওয়ার্ড বাই Supabase Storage & Tailwind CSS.</p>
-      <div class="flex items-center gap-4">
-        <span>এনক্রিপ্টেড ক্লাউড ট্রান্সফার</span>
+  <footer class="w-full border-t border-darkBorder/80 bg-darkCanvas/95 py-6 text-xs text-slate-500 text-center">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p>© 2026 MiniHost Platform. Built with Tailwind CSS & Firebase Cloud Firestore.</p>
+      <div class="flex items-center gap-3 font-mono text-[11px]">
+        <span>Single Vercel Deployment</span>
         <span>·</span>
-        <span class="text-cyan-400">Vercel Ready</span>
+        <span class="text-limeAccent-400">Dynamic Slug Simulator</span>
       </div>
     </div>
   </footer>
 
-  <!-- ================= TOAST NOTIFICATION ================= -->
-  <div 
-    id="toastNotification" 
-    class="fixed bottom-6 right-6 z-50 hidden px-4 py-3 bg-slate-900 border border-cyan-500/40 text-white text-xs font-mono rounded-xl shadow-2xl shadow-cyan-500/20 flex items-center gap-2.5 transition-all transform duration-300"
-  >
-    <i class="bi bi-check-circle-fill text-emerald-400 text-base"></i>
-    <span id="toastText">লিংক কপি সম্পন্ন হয়েছে!</span>
-  </div>
-
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= APPLICATION LOGIC (FIREBASE & ROUTING) ================= -->
   <script>
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://tjbykrzomrhpvhmslrja.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_SrWf-M4BEN1hf3lMBV9uoQ_OLb4aZML';
-    const BUCKET_NAME = 'My file';
+    // -------------------------------------------------------------
+    // 1. FIREBASE CONFIGURATION & INITIALIZATION
+    // -------------------------------------------------------------
+    // You can replace these default keys with your own Firebase Console keys.
+    // The user can also update them on the fly via the "Settings" button.
+    const DEFAULT_CONFIG = {
+      apiKey: "AIzaSyDemoKeyMiniHostPlatform2026",
+      authDomain: "minihost-demo.firebaseapp.com",
+      projectId: "minihost-demo",
+      storageBucket: "minihost-demo.appspot.com",
+      messagingSenderId: "109876543210",
+      appId: "1:109876543210:web:demo998877"
+    };
 
-    // Supabase Client Initialization
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let db = null;
+    let isFirestoreActive = false;
 
-    // Current State
-    let selectedFile = null;
-    let isUploading = false;
+    function initFirebase() {
+      try {
+        const savedConfigStr = localStorage.getItem('minihost_firebase_config');
+        const activeConfig = savedConfigStr ? JSON.parse(savedConfigStr) : DEFAULT_CONFIG;
 
-    // Load History on Page Load
-    document.addEventListener('DOMContentLoaded', () => {
-      renderHistory();
+        // Initialize Firebase app if not already initialized
+        if (!firebase.apps.length) {
+          firebase.initializeApp(activeConfig);
+        }
+
+        db = firebase.firestore();
+        isFirestoreActive = true;
+        updateStatusIndicator(true, "Firestore Ready");
+      } catch (err) {
+        console.warn("Firebase initialized in Local/Demo fallback mode:", err.message);
+        isFirestoreActive = false;
+        updateStatusIndicator(false, "Demo Mode (Local Active)");
+      }
+    }
+
+    function updateStatusIndicator(active, text) {
+      const dot = document.getElementById('firebaseStatusDot');
+      const label = document.getElementById('firebaseStatusText');
+      if (dot && label) {
+        label.textContent = text;
+        if (active) {
+          dot.className = "w-2 h-2 rounded-full bg-limeAccent-400 animate-pulse";
+        } else {
+          dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2. ROUTING ENGINE: DETECT SLUGS VIA QUERY OR HASH
+    // -------------------------------------------------------------
+    // Supports:
+    // 1. https://mysite.vercel.app/?site=alex-portfolio
+    // 2. https://mysite.vercel.app/#/site/alex-portfolio or #site/alex-portfolio
+    // 3. https://mysite.vercel.app/site/alex-portfolio (if rewritten)
+    function extractSlugFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const querySite = urlParams.get('site');
+      if (querySite) return querySite.toLowerCase().trim();
+
+      const hash = window.location.hash;
+      if (hash) {
+        const match = hash.match(/#\/?site\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) return match[1].toLowerCase().trim();
+      }
+
+      // Check pathname (e.g. /site/slug)
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      if (pathParts.length >= 2 && pathParts[0] === 'site') {
+        return pathParts[1].toLowerCase().trim();
+      }
+
+      return null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initFirebase();
+      handleRouting();
+      renderRecentSites();
+      initDefaultFormValues();
     });
 
-    // Handle File Selection
-    function handleFileSelect(event) {
-      const files = event.target.files;
-      if (files && files.length > 0) {
-        processSelectedFile(files[0]);
-      }
-    }
+    window.addEventListener('popstate', handleRouting);
+    window.addEventListener('hashchange', handleRouting);
 
-    // Drag & Drop Handlers
-    function handleDragOver(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('dropZone').classList.add('drag-over', 'border-cyan-400', 'bg-slate-900/80');
-    }
-
-    function handleDragLeave(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('dropZone').classList.remove('drag-over', 'border-cyan-400', 'bg-slate-900/80');
-    }
-
-    function handleDrop(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('dropZone').classList.remove('drag-over', 'border-cyan-400', 'bg-slate-900/80');
-
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        processSelectedFile(e.dataTransfer.files[0]);
-      }
-    }
-
-    // Process & Validate Selected File
-    function processSelectedFile(file) {
-      selectedFile = file;
-
-      // Hide results or error cards
-      document.getElementById('resultCard').classList.add('hidden');
-      document.getElementById('errorCard').classList.add('hidden');
-
-      // Update UI elements
-      document.getElementById('dropPrompt').classList.add('hidden');
-      document.getElementById('filePreviewContainer').classList.remove('hidden');
-
-      document.getElementById('previewFileName').textContent = file.name;
-      document.getElementById('previewFileSize').textContent = formatBytes(file.size);
-
-      const ext = file.name.split('.').pop().toLowerCase();
-      document.getElementById('previewFileType').textContent = ext || 'FILE';
-
-      // Thumbnail preview if image
-      const thumb = document.getElementById('imageThumbnail');
-      const typeIcon = document.getElementById('fileTypeIcon');
-
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          thumb.src = e.target.result;
-          thumb.classList.remove('hidden');
-          typeIcon.classList.add('hidden');
-        };
-        reader.readAsDataURL(file);
+    function handleRouting() {
+      const slug = extractSlugFromUrl();
+      if (slug) {
+        // Site viewer mode
+        loadAndRenderSite(slug);
       } else {
-        thumb.classList.add('hidden');
-        typeIcon.classList.remove('hidden');
-
-        // Set contextual icon
-        if (file.type.includes('pdf')) typeIcon.className = "bi bi-file-earmark-pdf text-2xl text-rose-400";
-        else if (file.type.includes('video')) typeIcon.className = "bi bi-file-earmark-play text-2xl text-purple-400";
-        else if (file.type.includes('zip') || file.type.includes('tar') || file.type.includes('rar')) typeIcon.className = "bi bi-file-earmark-zip text-2xl text-amber-400";
-        else if (file.type.includes('audio')) typeIcon.className = "bi bi-file-earmark-music text-2xl text-emerald-400";
-        else typeIcon.className = "bi bi-file-earmark-text text-2xl text-cyan-400";
-      }
-
-      // Enable Upload Button
-      const uploadBtn = document.getElementById('uploadBtn');
-      uploadBtn.disabled = false;
-      uploadBtn.className = "w-full py-3.5 px-6 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-lg shadow-emerald-500/25 cursor-pointer active:scale-[0.99]";
-      document.getElementById('uploadBtnText').textContent = "আপলোড শুরু করুন";
-    }
-
-    // Clear Selected File
-    function clearSelectedFile(event) {
-      if (event) event.stopPropagation();
-      selectedFile = null;
-      document.getElementById('fileInput').value = '';
-      document.getElementById('dropPrompt').classList.remove('hidden');
-      document.getElementById('filePreviewContainer').classList.add('hidden');
-
-      const uploadBtn = document.getElementById('uploadBtn');
-      uploadBtn.disabled = true;
-      uploadBtn.className = "w-full py-3.5 px-6 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2.5 bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50";
-      document.getElementById('uploadBtnText').textContent = "একটি ফাইল নির্বাচন করুন";
-    }
-
-    // Upload to Supabase Storage
-    async function uploadFile() {
-      if (!selectedFile || isUploading) return;
-
-      isUploading = true;
-      const uploadBtn = document.getElementById('uploadBtn');
-      const progressWrapper = document.getElementById('progressWrapper');
-      const progressBar = document.getElementById('progressBar');
-      const progressPercent = document.getElementById('progressPercent');
-      const progressStatus = document.getElementById('progressStatusText');
-
-      // Update UI to Uploading state
-      uploadBtn.disabled = true;
-      uploadBtn.classList.add('opacity-70');
-      document.getElementById('uploadBtnText').textContent = "আপলোড হচ্ছে...";
-      progressWrapper.classList.remove('hidden');
-      document.getElementById('errorCard').classList.add('hidden');
-      document.getElementById('resultCard').classList.add('hidden');
-
-      // Simulated Progress Animation
-      let progress = 15;
-      progressBar.style.width = `${progress}%`;
-      progressPercent.textContent = `${progress}%`;
-
-      const progressInterval = setInterval(() => {
-        if (progress < 85) {
-          progress += Math.floor(Math.random() * 12) + 5;
-          if (progress > 85) progress = 85;
-          progressBar.style.width = `${progress}%`;
-          progressPercent.textContent = `${progress}%`;
-        }
-      }, 200);
-
-      try {
-        // Unique File Name Generation
-        const safeOriginalName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const fileName = `${Date.now()}_${safeOriginalName}`;
-
-        // Supabase Upload Call
-        const { data, error } = await _supabase.storage
-          .from(BUCKET_NAME)
-          .upload(fileName, selectedFile, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        clearInterval(progressInterval);
-
-        if (error) {
-          throw error;
-        }
-
-        // Complete Progress
-        progressBar.style.width = '100%';
-        progressPercent.textContent = '100%';
-        progressStatus.textContent = 'পাবলিক ডাউনলোড লিংক তৈরি হচ্ছে...';
-
-        // Retrieve Public Download URL
-        const { data: publicUrlData } = _supabase.storage
-          .from(BUCKET_NAME)
-          .getPublicUrl(fileName);
-
-        const fileUrl = publicUrlData.publicUrl;
-
-        // Show Success Result
-        setTimeout(() => {
-          progressWrapper.classList.add('hidden');
-          document.getElementById('resultCard').classList.remove('hidden');
-          document.getElementById('fileUrlInput').value = fileUrl;
-          document.getElementById('viewFileLink').href = fileUrl;
-
-          // Save to Local History
-          saveToHistory({
-            name: selectedFile.name,
-            size: formatBytes(selectedFile.size),
-            url: fileUrl,
-            time: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
-          });
-
-          showToast("ফাইল সফলভাবে আপলোড হয়েছে!");
-          isUploading = false;
-        }, 400);
-
-      } catch (err) {
-        clearInterval(progressInterval);
-        progressWrapper.classList.add('hidden');
-        document.getElementById('errorCard').classList.remove('hidden');
-        document.getElementById('errorMessage').textContent = `আপলোড ব্যর্থ হয়েছে: ${err.message || 'নেটওয়ার্ক বা পারমিশন ত্রুটি'}`;
-
-        uploadBtn.disabled = false;
-        uploadBtn.classList.remove('opacity-70');
-        document.getElementById('uploadBtnText').textContent = "পুনরায় চেষ্টা করুন";
-        isUploading = false;
+        // Dashboard creator mode
+        showDashboardView();
       }
     }
 
-    // Copy URL to Clipboard
-    function copyPublicUrl() {
-      const urlInput = document.getElementById('fileUrlInput');
-      urlInput.select();
-      urlInput.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(urlInput.value);
-
-      const copyBtnText = document.getElementById('copyBtnText');
-      copyBtnText.textContent = "কপি হয়েছে!";
-      showToast("লিংক ক্লিপবোর্ডে কপি সম্পন্ন হয়েছে!");
-
-      setTimeout(() => {
-        copyBtnText.textContent = "কপি লিংক";
-      }, 2000);
+    function navigateToDashboard(e) {
+      if (e) e.preventDefault();
+      // Remove query param or hash without reloading
+      const url = new URL(window.location.href);
+      url.searchParams.delete('site');
+      url.hash = '';
+      window.history.pushState({}, '', url.pathname);
+      showDashboardView();
     }
 
-    // Reset Uploader for New Upload
-    function resetUploader() {
-      clearSelectedFile();
-      document.getElementById('resultCard').classList.add('hidden');
-      document.getElementById('errorCard').classList.add('hidden');
-      document.getElementById('progressWrapper').classList.add('hidden');
+    function showDashboardView() {
+      document.getElementById('viewDashboard').classList.remove('hidden');
+      document.getElementById('viewSiteViewer').classList.add('hidden');
+      document.getElementById('view404').classList.add('hidden');
+      document.getElementById('viewLoading').classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Save File to History
-    function saveToHistory(item) {
-      let history = JSON.parse(localStorage.getItem('supabase_upload_history') || '[]');
-      history.unshift(item);
-      if (history.length > 8) history = history.slice(0, 8);
-      localStorage.setItem('supabase_upload_history', JSON.stringify(history));
-      renderHistory();
+    // -------------------------------------------------------------
+    // 3. FIRESTORE DATA ACCESS WITH SEAMLESS LOCALSTORAGE FALLBACK
+    // -------------------------------------------------------------
+    async function getSiteBySlug(slug) {
+      // 1. Try Firestore first if available
+      if (isFirestoreActive && db) {
+        try {
+          const docRef = db.collection('mini_sites').doc(slug);
+          const doc = await docRef.get();
+          if (doc.exists) {
+            return doc.data();
+          }
+        } catch (err) {
+          console.warn("Firestore query error, trying local fallback:", err);
+        }
+      }
+
+      // 2. Fallback to LocalStorage database (guarantees zero-error Vercel demo)
+      const localSites = JSON.parse(localStorage.getItem('minihost_local_sites') || '{}');
+      if (localSites[slug]) {
+        return localSites[slug];
+      }
+
+      // Preloaded sample sites for immediate showcase
+      if (slug === 'demo') {
+        return {
+          slug: 'demo',
+          title: 'Welcome to MiniHost',
+          subtitle: 'The Ultra-Fast Dynamic Micro-Page Hosting System',
+          author: 'MiniHost Core Team',
+          avatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+          github: 'https://github.com',
+          twitter: 'https://x.com',
+          website: 'https://vercel.com',
+          content: `## Everything You Need in a Single Vercel Deployment\n\nThis page was rendered dynamically using the **\`?site=demo\`** slug mapped to Cloud Firestore!\n\n### Key Highlights\n- **Zero Config Routing:** Handles query parameters or hashes effortlessly.\n- **Sleek Dark Theme:** Lime-White high contrast palette.\n- **Markdown & HTML:** Clean sanitized rich formatting.\n- **Production Ready:** 100% self-contained in one HTML file.\n\n> "Simplicity is the ultimate sophistication." — Leonardo da Vinci`,
+          publishedAt: new Date().toISOString()
+        };
+      }
+
+      return null;
     }
 
-    // Render Recent Uploads History
-    function renderHistory() {
-      const history = JSON.parse(localStorage.getItem('supabase_upload_history') || '[]');
-      const container = document.getElementById('historyList');
-      const clearBtn = document.getElementById('clearHistoryBtn');
-      const emptyState = document.getElementById('historyEmpty');
+    async function saveSiteToStorage(data) {
+      // 1. Save locally to guarantee persistence
+      const localSites = JSON.parse(localStorage.getItem('minihost_local_sites') || '{}');
+      localSites[data.slug] = data;
+      localStorage.setItem('minihost_local_sites', JSON.stringify(localSites));
 
-      if (history.length === 0) {
-        emptyState.classList.remove('hidden');
-        clearBtn.classList.add('hidden');
-        container.innerHTML = '';
-        container.appendChild(emptyState);
+      // 2. Save to Firestore if available
+      if (isFirestoreActive && db) {
+        try {
+          await db.collection('mini_sites').doc(data.slug).set(data);
+        } catch (err) {
+          console.warn("Could not save to remote Firestore (saved locally):", err.message);
+        }
+      }
+
+      return true;
+    }
+
+    // -------------------------------------------------------------
+    // 4. DYNAMIC VIEWER & 404 HANDLER
+    // -------------------------------------------------------------
+    async function loadAndRenderSite(slug) {
+      document.getElementById('viewDashboard').classList.add('hidden');
+      document.getElementById('viewSiteViewer').classList.add('hidden');
+      document.getElementById('view404').classList.add('hidden');
+      document.getElementById('viewLoading').classList.remove('hidden');
+
+      const siteData = await getSiteBySlug(slug);
+
+      document.getElementById('viewLoading').classList.add('hidden');
+
+      if (!siteData) {
+        // Show 404 Site Not Found View
+        document.getElementById('notFoundSlug').textContent = `?site=${slug}`;
+        document.getElementById('view404').classList.remove('hidden');
         return;
       }
 
-      emptyState.classList.add('hidden');
-      clearBtn.classList.remove('hidden');
-      container.innerHTML = '';
+      // Render Dynamic Site Content
+      document.getElementById('liveTitle').textContent = siteData.title || slug;
+      document.getElementById('liveSubtitle').textContent = siteData.subtitle || '';
+      document.getElementById('liveAuthor').textContent = siteData.author ? `by ${siteData.author}` : '';
+      document.getElementById('liveSlugBadge').textContent = `?site=${siteData.slug}`;
 
-      history.forEach((file) => {
-        const itemEl = document.createElement('div');
-        itemEl.className = "flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-colors text-xs";
-        itemEl.innerHTML = `
-          <div class="flex items-center gap-3 overflow-hidden mr-3">
-            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-cyan-400 shrink-0">
-              <i class="bi bi-file-earmark-check"></i>
-            </div>
-            <div class="overflow-hidden">
-              <p class="font-medium text-slate-200 truncate max-w-[200px] sm:max-w-xs">${escapeHtml(file.name)}</p>
-              <p class="text-[11px] text-slate-500 font-mono">${file.size} · ${file.time}</p>
-            </div>
+      // Avatar
+      const avatarImg = document.getElementById('liveAvatarImg');
+      const avatarFallback = document.getElementById('liveAvatarFallback');
+      if (siteData.avatar) {
+        avatarImg.src = siteData.avatar;
+        avatarImg.classList.remove('hidden');
+        avatarFallback.classList.add('hidden');
+      } else {
+        avatarImg.classList.add('hidden');
+        avatarFallback.classList.remove('hidden');
+      }
+
+      // Social Links
+      const socialsWrap = document.getElementById('liveSocialsWrap');
+      socialsWrap.innerHTML = '';
+      if (siteData.github) {
+        socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.github)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-github"></i></a>`;
+      }
+      if (siteData.twitter) {
+        socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.twitter)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-twitter-x"></i></a>`;
+      }
+      if (siteData.website) {
+        socialsWrap.innerHTML += `<a href="${ensureHttp(siteData.website)}" target="_blank" class="hover:text-limeAccent-400 transition-colors"><i class="bi bi-globe"></i></a>`;
+      }
+
+      // Render Markdown / HTML sanitized content
+      const rawHtml = marked.parse(siteData.content || '');
+      const cleanHtml = DOMPurify.sanitize(rawHtml);
+      document.getElementById('liveContentBody').innerHTML = cleanHtml;
+
+      document.getElementById('viewSiteViewer').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function claimCurrentSlug() {
+      const slug = extractSlugFromUrl();
+      navigateToDashboard();
+      if (slug) {
+        document.getElementById('inputSlug').value = slug;
+        handleSlugInput(slug);
+        document.getElementById('inputTitle').focus();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 5. DASHBOARD: PUBLISH FORM HANDLER & REAL-TIME PREVIEW
+    // -------------------------------------------------------------
+    function handleSlugInput(val) {
+      // Auto-format slug: lowercase and hyphenated
+      const sanitized = val.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+      document.getElementById('inputSlug').value = sanitized;
+
+      const fullUrl = `${window.location.origin}${window.location.pathname}?site=${sanitized || 'your-slug'}`;
+      document.getElementById('previewSlugIndicator').textContent = fullUrl;
+      document.getElementById('previewBarUrl').textContent = `/site/${sanitized || 'your-slug'}`;
+    }
+
+    function updateLivePreview() {
+      const title = document.getElementById('inputTitle').value.trim() || 'Your Name / Project';
+      const subtitle = document.getElementById('inputSubtitle').value.trim() || 'Role or Catchy Subtitle';
+      const avatarUrl = document.getElementById('inputAvatar').value.trim();
+      const content = document.getElementById('inputContent').value.trim() || 'Start typing in the creator form to preview...';
+
+      document.getElementById('previewTitle').textContent = title;
+      document.getElementById('previewSubtitle').textContent = subtitle;
+
+      // Avatar preview
+      const thumb = document.getElementById('previewAvatarImg');
+      const defIcon = document.getElementById('previewAvatarDefault');
+      if (avatarUrl) {
+        thumb.src = avatarUrl;
+        thumb.classList.remove('hidden');
+        defIcon.classList.add('hidden');
+      } else {
+        thumb.classList.add('hidden');
+        defIcon.classList.remove('hidden');
+      }
+
+      // Socials preview
+      const gh = document.getElementById('inputGithub').value.trim();
+      const tw = document.getElementById('inputTwitter').value.trim();
+      const wb = document.getElementById('inputWebsite').value.trim();
+
+      document.getElementById('previewSocialGithub').classList.toggle('hidden', !gh);
+      document.getElementById('previewSocialTwitter').classList.toggle('hidden', !tw);
+      document.getElementById('previewSocialWebsite').classList.toggle('hidden', !wb);
+
+      // Render Markdown preview
+      const rawHtml = marked.parse(content);
+      document.getElementById('previewContentBody').innerHTML = DOMPurify.sanitize(rawHtml);
+    }
+
+    async function handlePublish(e) {
+      e.preventDefault();
+
+      const slug = document.getElementById('inputSlug').value.trim().toLowerCase();
+      if (!slug) {
+        showToast("Please provide a valid slug!");
+        return;
+      }
+
+      const publishBtn = document.getElementById('publishBtn');
+      const btnText = document.getElementById('publishBtnText');
+      const btnIcon = document.getElementById('publishBtnIcon');
+
+      // Loading state
+      publishBtn.disabled = true;
+      btnText.textContent = "Publishing to Firestore...";
+      btnIcon.className = "bi bi-arrow-repeat animate-spin text-base";
+
+      const payload = {
+        slug: slug,
+        title: document.getElementById('inputTitle').value.trim(),
+        subtitle: document.getElementById('inputSubtitle').value.trim(),
+        author: document.getElementById('inputAuthor').value.trim(),
+        avatar: document.getElementById('inputAvatar').value.trim(),
+        github: document.getElementById('inputGithub').value.trim(),
+        twitter: document.getElementById('inputTwitter').value.trim(),
+        website: document.getElementById('inputWebsite').value.trim(),
+        content: document.getElementById('inputContent').value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        await saveSiteToStorage(payload);
+
+        // Success state
+        btnText.textContent = "Published!";
+        btnIcon.className = "bi bi-check-circle-fill text-base";
+        showToast(`✓ Site published under slug: ${slug}`);
+
+        renderRecentSites();
+        openSuccessModal(slug);
+
+      } catch (err) {
+        showToast(`Publish error: ${err.message}`);
+      } finally {
+        setTimeout(() => {
+          publishBtn.disabled = false;
+          btnText.textContent = "Publish Page to Firestore";
+          btnIcon.className = "bi bi-cloud-arrow-up-fill text-base";
+        }, 1500);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 6. SUCCESS MODAL & URL COPY
+    // -------------------------------------------------------------
+    function openSuccessModal(slug) {
+      const fullUrl = `${window.location.origin}${window.location.pathname}?site=${slug}`;
+      document.getElementById('modalUrlInput').value = fullUrl;
+      document.getElementById('modalOpenTabBtn').href = fullUrl;
+      document.getElementById('successModal').classList.remove('hidden');
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.add('hidden');
+    }
+
+    function copyModalUrl() {
+      const input = document.getElementById('modalUrlInput');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+
+      const copyBtnText = document.getElementById('modalCopyBtnText');
+      copyBtnText.textContent = "Copied!";
+      showToast("✓ Live URL copied to clipboard!");
+      setTimeout(() => {
+        copyBtnText.textContent = "Copy";
+      }, 2000);
+    }
+
+    // -------------------------------------------------------------
+    // 7. TEMPLATES
+    // -------------------------------------------------------------
+    function applyTemplate(type) {
+      if (type === 'developer') {
+        document.getElementById('inputSlug').value = 'alex-dev';
+        document.getElementById('inputTitle').value = 'Alex Rivera';
+        document.getElementById('inputSubtitle').value = 'Senior Creative Full-Stack Engineer';
+        document.getElementById('inputAuthor').value = 'Alex Rivera';
+        document.getElementById('inputAvatar').value = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+        document.getElementById('inputGithub').value = 'https://github.com';
+        document.getElementById('inputTwitter').value = 'https://x.com';
+        document.getElementById('inputWebsite').value = 'https://vercel.com';
+        document.getElementById('inputContent').value = `## Creative Architect & Systems Developer\n\nI build high-frequency web experiences, reactive user interfaces, and cloud architectures.\n\n### Featured Projects\n- **[HyperDrive UI](https://github.com):** Zero-latency design token library\n- **[Vercel Dynamic Slug Router](https://vercel.com):** Single-page micro-hosting\n\n### Core Stack\n\`TypeScript\` · \`React 19\` · \`Tailwind CSS\` · \`Firebase Firestore\` · \`Node.js\``;
+      } else if (type === 'creator') {
+        document.getElementById('inputSlug').value = 'mia-art';
+        document.getElementById('inputTitle').value = 'Mia Chen — Digital Creator';
+        document.getElementById('inputSubtitle').value = '3D Art, Motion Design & Weekly Monograph';
+        document.getElementById('inputAuthor').value = 'Mia Chen';
+        document.getElementById('inputAvatar').value = 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80';
+        document.getElementById('inputContent').value = `## Welcome to My Creative Journal\n\nExplore my curated gallery of generative artworks, 3D renders, and design thoughts.\n\n- 🎨 **Weekly Wallpaper Drop:** High-resolution wallpapers for desktop and mobile.\n- 🎙️ **The Creative Studio Podcast:** Conversations with global digital designers.\n- 💌 **Join the Monograph:** Sent every Sunday to 15,000+ readers.`;
+      } else if (type === 'product') {
+        document.getElementById('inputSlug').value = 'aurora-app';
+        document.getElementById('inputTitle').value = 'Aurora Desktop';
+        document.getElementById('inputSubtitle').value = 'The Next-Generation Ambient Workspace';
+        document.getElementById('inputAvatar').value = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80';
+        document.getElementById('inputContent').value = `## Effortless Flow for Focused Thinkers\n\nAurora combines spatial notes, audio soundscapes, and lightning-fast keyboard navigation into one refined window.\n\n### Key Features\n1. **Sub-10ms Input Latency:** Optimized Rust and WebGL canvas.\n2. **Local-First Security:** Zero telemetry, encrypted private vault.\n3. **Multi-Device Sync:** Instant synchronization across macOS, Windows, and Web.`;
+      }
+
+      handleSlugInput(document.getElementById('inputSlug').value);
+      updateLivePreview();
+      showToast(`✓ Applied ${type} template!`);
+    }
+
+    // -------------------------------------------------------------
+    // 8. RECENT SITES LIST
+    // -------------------------------------------------------------
+    function renderRecentSites() {
+      const grid = document.getElementById('recentSitesGrid');
+      grid.innerHTML = '';
+
+      const localSites = JSON.parse(localStorage.getItem('minihost_local_sites') || '{}');
+      const slugs = Object.keys(localSites);
+
+      if (slugs.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-8 text-center text-slate-500 font-mono text-xs border border-dashed border-darkBorder rounded-xl">
+            No published sites yet. Fill out the form above to launch your first micro-site!
           </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button 
-              onclick="copyDirectUrl('${escapeHtml(file.url)}')" 
-              class="p-2 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition-colors" 
-              title="লিংক কপি করুন"
-            >
-              <i class="bi bi-clipboard"></i>
+        `;
+        return;
+      }
+
+      slugs.forEach(slug => {
+        const item = localSites[slug];
+        const siteUrl = `${window.location.origin}${window.location.pathname}?site=${slug}`;
+        const card = document.createElement('div');
+        card.className = "p-4 rounded-xl bg-darkCard border border-darkBorder hover:border-limeAccent-400/50 transition-all flex flex-col justify-between space-y-3";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono text-limeAccent-400 font-bold">?site=${slug}</span>
+              <span class="text-[10px] font-mono text-slate-500">Active</span>
+            </div>
+            <h4 class="font-bold text-sm text-white mt-1 truncate">${escapeHtml(item.title || slug)}</h4>
+            <p class="text-xs text-slate-400 truncate">${escapeHtml(item.subtitle || 'No subtitle')}</p>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-darkBorder text-xs font-mono">
+            <button onclick="editExistingSite('${slug}')" class="text-slate-400 hover:text-white cursor-pointer">
+              <i class="bi bi-pencil mr-1"></i> Edit
             </button>
-            <a 
-              href="${escapeHtml(file.url)}" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition-colors"
-              title="ওপেন করুন"
-            >
-              <i class="bi bi-box-arrow-up-right"></i>
+            <a href="${siteUrl}" class="text-limeAccent-400 hover:underline">
+              View Site →
             </a>
           </div>
         `;
-        container.appendChild(itemEl);
+        grid.appendChild(card);
       });
     }
 
-    function copyDirectUrl(url) {
-      navigator.clipboard.writeText(url);
-      showToast("লিংক কপি সম্পন্ন হয়েছে!");
+    function editExistingSite(slug) {
+      const localSites = JSON.parse(localStorage.getItem('minihost_local_sites') || '{}');
+      const data = localSites[slug];
+      if (!data) return;
+
+      document.getElementById('inputSlug').value = data.slug;
+      document.getElementById('inputTitle').value = data.title || '';
+      document.getElementById('inputSubtitle').value = data.subtitle || '';
+      document.getElementById('inputAuthor').value = data.author || '';
+      document.getElementById('inputAvatar').value = data.avatar || '';
+      document.getElementById('inputGithub').value = data.github || '';
+      document.getElementById('inputTwitter').value = data.twitter || '';
+      document.getElementById('inputWebsite').value = data.website || '';
+      document.getElementById('inputContent').value = data.content || '';
+
+      handleSlugInput(data.slug);
+      updateLivePreview();
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+      showToast(`Loaded ${slug} into editor!`);
     }
 
-    function clearHistory() {
-      localStorage.removeItem('supabase_upload_history');
-      renderHistory();
-      showToast("ইতিহাস মুছে ফেলা হয়েছে।");
+    // -------------------------------------------------------------
+    // 9. FIREBASE SETTINGS MODAL
+    // -------------------------------------------------------------
+    function openFirebaseConfigModal() {
+      const savedConfig = JSON.parse(localStorage.getItem('minihost_firebase_config') || JSON.stringify(DEFAULT_CONFIG));
+      document.getElementById('cfgApiKey').value = savedConfig.apiKey || '';
+      document.getElementById('cfgProjectId').value = savedConfig.projectId || '';
+      document.getElementById('cfgAuthDomain').value = savedConfig.authDomain || '';
+      document.getElementById('cfgStorageBucket').value = savedConfig.storageBucket || '';
+      document.getElementById('cfgAppId').value = savedConfig.appId || '';
+
+      document.getElementById('firebaseConfigModal').classList.remove('hidden');
     }
 
-    // Helper: Format Bytes to KB / MB
-    function formatBytes(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    function closeFirebaseConfigModal() {
+      document.getElementById('firebaseConfigModal').classList.add('hidden');
     }
 
-    // Helper: Toast Message
+    function saveFirebaseConfigFromModal() {
+      const newConfig = {
+        apiKey: document.getElementById('cfgApiKey').value.trim(),
+        projectId: document.getElementById('cfgProjectId').value.trim(),
+        authDomain: document.getElementById('cfgAuthDomain').value.trim(),
+        storageBucket: document.getElementById('cfgStorageBucket').value.trim(),
+        appId: document.getElementById('cfgAppId').value.trim()
+      };
+
+      localStorage.setItem('minihost_firebase_config', JSON.stringify(newConfig));
+      closeFirebaseConfigModal();
+      showToast("✓ Firebase credentials updated!");
+
+      // Re-initialize
+      try {
+        if (firebase.apps.length) {
+          firebase.app().delete().then(() => {
+            initFirebase();
+          });
+        } else {
+          initFirebase();
+        }
+      } catch (e) {
+        window.location.reload();
+      }
+    }
+
+    function resetToDemoStorage() {
+      localStorage.removeItem('minihost_firebase_config');
+      closeFirebaseConfigModal();
+      showToast("Switched to Local Demo mode!");
+      initFirebase();
+    }
+
+    // -------------------------------------------------------------
+    // 10. UTILITIES
+    // -------------------------------------------------------------
+    function initDefaultFormValues() {
+      applyTemplate('developer');
+    }
+
+    function ensureHttp(url) {
+      if (!url) return '#';
+      if (!/^https?:\/\//i.test(url)) return 'https://' + url;
+      return url;
+    }
+
     function showToast(msg) {
-      const toast = document.getElementById('toastNotification');
-      const text = document.getElementById('toastText');
+      const box = document.getElementById('toastBox');
+      const text = document.getElementById('toastMsg');
       text.textContent = msg;
-      toast.classList.remove('hidden');
+      box.classList.remove('hidden');
       setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3000);
+        box.classList.add('hidden');
+      }, 3500);
     }
 
-    // Helper: Escape HTML string
     function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
   </script>
 </body>
